@@ -4,6 +4,7 @@ import nltk
 from nltk.corpus import stopwords
 import libspacy
 import libgrams
+import libwordnet
 
 def main():
   print "Hello"
@@ -53,7 +54,13 @@ def main():
   print "-"*40
   avg_capitalized_words(raw_weird)
   avg_capitalized_words(raw_normal)
-
+  print "-"*40
+  avg_animals(raw_weird)
+  avg_animals(raw_normal)
+  print "-"*40
+  avg_body_parts(raw_weird)
+  avg_body_parts(raw_normal)
+  print "-"*40
 
 
 
@@ -137,13 +144,38 @@ def avg_capitalized_words(titles):
   num_titles = len(titles)
   for title in titles:
     for word in title.split(' '):
-      if word.upper()==word:
-        print word
+      if word.upper()==word and word.lower() !=word:
+        #print word
         total_caps +=1
 
   avg_caps = float(total_caps)/num_titles
   print "Capitalized words", avg_caps
 
+def avg_animals(titles):
+  total_animals = 0
+  num_titles = len(titles)
+  for title in titles:
+    nouns = libspacy.get_nouns(title)
+    animals = [w for w in nouns if libwordnet.is_animal(w) ]
+    #if animals:
+    #  print animals
+    total_animals +=len(animals)
+
+  avg_animals = float(total_animals)/num_titles
+  print "Average animals", avg_animals
+
+def avg_body_parts(titles):
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    nouns = libspacy.get_nouns(title)
+    parts = [w for w in nouns if libwordnet.is_body_part(w) ]
+    #if parts:
+    #  print parts
+    total +=len(parts)
+
+  avg = float(total)/num_titles
+  print "Average body_parts", avg
 
 if __name__ == "__main__":
   main()

@@ -6,13 +6,13 @@ import spacy
 nlp = English()
 #probs = [lex.prob for lex in nlp.vocab]
 #probs.sort()
-def get_adjectives(sentence):
-  adjs = set()
+def get_nouns(sentence):
+  nouns = set()
   sentence = nlp(sentence.decode('utf-8'))
   for token in sentence:
-    if token.pos == spacy.parts_of_speech.ADJ:
-      adjs.add(token.string)
-  return adjs
+    if token.pos == spacy.parts_of_speech.NOUN:
+      nouns.add(token.string)
+  return list(nouns)
 
 #Gives a tuple of counts in this sequence Noun, Verb, Adj, Adv
 def get_pos_counts(sentence):
