@@ -3,6 +3,7 @@ import sys
 import nltk
 from nltk.corpus import stopwords
 import libspacy
+import libgrams
 
 def main():
   print "Hello"
@@ -17,7 +18,7 @@ def main():
   for line in fd:
     json_obj = json.loads(line)
     title = ''.join([i if ord(i) < 128 else ' ' for i in json_obj['title']])
-    raw_weird.append(title)
+    raw_weird.append(str(title))
 
   print "Weird news items :", len(raw_weird)
 
@@ -26,10 +27,11 @@ def main():
   for line in fd:
     json_obj = json.loads(line)
     title = ''.join([i if ord(i) < 128 else ' ' for i in json_obj['title']])
-    raw_normal.append(title)
+    raw_normal.append(str(title))
 
   print "Normal news items :", len(raw_normal)
 
+  '''
   print_sentence_structure(raw_weird)
   print_sentence_structure(raw_normal)
   print "-"*40
@@ -39,9 +41,18 @@ def main():
   print_avg_word_len(raw_weird)
   print_avg_word_len(raw_normal)
   print "-"*40
-  print_pos_distributions(raw_weird)
-  print_pos_distributions(raw_normal)
+  #print_pos_distributions(raw_weird)
+  #print_pos_distributions(raw_normal)
+  #print "-"*40
+  print_quoted_counts(raw_weird)
+  print_quoted_counts(raw_normal)
   print "-"*40
+  '''
+  most_repeated_bigrams(raw_weird)
+  most_repeated_bigrams(raw_normal)
+  print "-"*40
+  avg_capitalized_words(raw_weird)
+  avg_capitalized_words(raw_normal)
 
 
 
@@ -93,6 +104,46 @@ def print_pos_distributions(titles):
   total_counts=map(lambda x:float(x)/num_titles, total_counts)
 
   print "POS_stats", total_counts
+
+def print_quoted_counts(titles):
+  total_num_quotes = 0
+  num_titles = len(titles)
+  for title in titles:
+    num_quotes = title.count("'")
+    if num_quotes >=2:
+      total_num_quotes +=1
+
+  avg_num_quotes = float(total_num_quotes)/num_titles
+  print "Quoted chars", avg_num_quotes
+
+
+def most_repeated_bigrams(titles):
+  bigrams={}
+
+  for title in titles:
+   grams = libgrams.make_trigrams(title.lower())
+   for gram in grams:
+     bigrams[gram]=bigrams.get(gram,0)+1
+
+  #for gram in bigrams:
+    #print gram, bigrams[gram]
+  #print "-"*40
+  for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:20]:
+    print tup
+  #sys.exit()
+
+def avg_capitalized_words(titles):
+  total_caps = 0
+  num_titles = len(titles)
+  for title in titles:
+    for word in title.split(' '):
+      if word.upper()==word:
+        print word
+        total_caps +=1
+
+  avg_caps = float(total_caps)/num_titles
+  print "Capitalized words", avg_caps
+
 
 if __name__ == "__main__":
   main()
