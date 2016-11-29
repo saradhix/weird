@@ -42,9 +42,9 @@ def main():
   print_avg_word_len(raw_weird)
   print_avg_word_len(raw_normal)
   print "-"*40
-  #print_pos_distributions(raw_weird)
-  #print_pos_distributions(raw_normal)
-  #print "-"*40
+  print_pos_distributions(raw_weird)
+  print_pos_distributions(raw_normal)
+  print "-"*40
   print_quoted_counts(raw_weird)
   print_quoted_counts(raw_normal)
   print "-"*40
@@ -63,6 +63,9 @@ def main():
   print "-"*40
   avg_nes(raw_weird)
   avg_nes(raw_normal)
+  print "-"*40
+  avg_nes_halves(raw_weird)
+  avg_nes_halves(raw_normal)
   print "-"*40
 
 
@@ -138,8 +141,8 @@ def most_repeated_bigrams(titles):
   #for gram in bigrams:
     #print gram, bigrams[gram]
   #print "-"*40
-  for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:30]:
-    print tup
+  #for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:30]:
+  #  print tup
   #sys.exit()
 
 def avg_capitalized_words(titles):
@@ -190,5 +193,22 @@ def avg_nes(titles):
 
   avg = float(total)/num_titles
   print "Average NEs", avg
+
+
+def avg_nes_halves(titles):
+  total_f = total_s = 0
+  num_titles = len(titles)
+  for title in titles:
+    nes = libspacy.get_nes(' '.join(title.split(' ')[:len(title.split(' '))/2]))
+    #print nes
+    total_f +=len(nes)
+    nes = libspacy.get_nes(' '.join(title.split(' ')[len(title.split(' '))/2:]))
+    total_s +=len(nes)
+
+  avg_f = float(total_f)/num_titles
+  avg_s = float(total_s)/num_titles
+  print "Average NEs First half", avg_f
+  print "Average NEs Second half", avg_s
+
 if __name__ == "__main__":
   main()
