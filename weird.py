@@ -32,7 +32,7 @@ def main():
 
   print "Normal news items :", len(raw_normal)
 
-  '''
+  
   print_sentence_structure(raw_weird)
   print_sentence_structure(raw_normal)
   print "-"*40
@@ -48,7 +48,7 @@ def main():
   print_quoted_counts(raw_weird)
   print_quoted_counts(raw_normal)
   print "-"*40
-  '''
+  
   most_repeated_bigrams(raw_weird)
   most_repeated_bigrams(raw_normal)
   print "-"*40
@@ -60,6 +60,9 @@ def main():
   print "-"*40
   avg_body_parts(raw_weird)
   avg_body_parts(raw_normal)
+  print "-"*40
+  avg_nes(raw_weird)
+  avg_nes(raw_normal)
   print "-"*40
 
 
@@ -135,7 +138,7 @@ def most_repeated_bigrams(titles):
   #for gram in bigrams:
     #print gram, bigrams[gram]
   #print "-"*40
-  for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:20]:
+  for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:30]:
     print tup
   #sys.exit()
 
@@ -177,5 +180,15 @@ def avg_body_parts(titles):
   avg = float(total)/num_titles
   print "Average body_parts", avg
 
+def avg_nes(titles):
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    nes = libspacy.get_nes(title)
+    #print nes
+    total +=len(nes)
+
+  avg = float(total)/num_titles
+  print "Average NEs", avg
 if __name__ == "__main__":
   main()

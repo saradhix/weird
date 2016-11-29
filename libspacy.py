@@ -14,6 +14,11 @@ def get_nouns(sentence):
       nouns.add(token.string)
   return list(nouns)
 
+def get_nes(sentence):
+  parsed=nlp(sentence.decode('utf-8'))
+  nes = [ i.label_ for i in parsed.ents]
+  return nes
+
 #Gives a tuple of counts in this sequence Noun, Verb, Adj, Adv
 def get_pos_counts(sentence):
   pos_counts=[0,0,0,0]
