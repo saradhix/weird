@@ -117,9 +117,34 @@ def generate_features(title):
   pos_counts = libspacy.get_pos_counts(str(title))
   features +=pos_counts
 
+  #Quoted characters
+  num_quotes = title.count("'")
+  if num_quotes >=2:
+    num_quotes = 1
+  features.append(num_quotes)
+
   #Num capitalized words
   num_cap_words =sum( [word.upper()==word and word.lower() !=word for word in words])
   features.append(num_cap_words)
+
+  #Number of animals and human body parts
+  nouns = libspacy.get_nouns(title)
+  animals = [w for w in nouns if libwordnet.is_animal(w) ]
+  num_animals = len(animals)
+  parts = [w for w in nouns if libwordnet.is_body_part(w) ]
+  num_parts = len(animals)
+  features.append(num_animals)
+  features.append(num_parts)
+
+  #NEs in first and second halves
+  nes = libspacy.get_nes(' '.join(title.split(' ')[:len(title.split(' '))/2]))
+  total_f +=len(nes)
+  nes = libspacy.get_nes(' '.join(title.split(' ')[len(title.split(' '))/2:]))
+  total_s +=len(nes)
+
+  features.append(total_f)
+  features.append(total_s)
+
   return features
 
 def print_sentence_structure(titles):
@@ -178,8 +203,6 @@ def print_quoted_counts(titles):
     if num_quotes >=2:
       total_num_quotes +=1
 
-  avg_num_quotes = float(total_num_quotes)/num_titles
-  print "Quoted chars", avg_num_quotes
 
 
 def most_repeated_bigrams(titles):
