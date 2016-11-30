@@ -5,6 +5,7 @@ from nltk.corpus import stopwords
 import libspacy
 import libgrams
 import libwordnet
+from random import shuffle
 
 def main():
   print "Hello"
@@ -31,8 +32,7 @@ def main():
     raw_normal.append(str(title))
 
   print "Normal news items :", len(raw_normal)
-
-  
+  '''
   print_sentence_structure(raw_weird)
   print_sentence_structure(raw_normal)
   print "-"*40
@@ -48,7 +48,6 @@ def main():
   print_quoted_counts(raw_weird)
   print_quoted_counts(raw_normal)
   print "-"*40
-  
   most_repeated_bigrams(raw_weird)
   most_repeated_bigrams(raw_normal)
   print "-"*40
@@ -67,8 +66,61 @@ def main():
   avg_nes_halves(raw_weird)
   avg_nes_halves(raw_normal)
   print "-"*40
+  '''
+  #Create the test and training sets
+  shuffle(raw_weird)
+  shuffle(raw_normal)
+
+  train = 7000
+  test=1000
+
+  X_raw_train=raw_weird[:train]+raw_normal[:train]
+  X_raw_test=raw_weird[train:train+test]+raw_normal[train:train+test]
+  #Create the labels 1st half are weird class 1, rest are normal 0
+  y_train=[1]*train+[0]*train
+  y_test=[1]*test+[0]*test
+
+  X_train=[]
+  X_test=[]
 
 
+  for raw_title in X_raw_train:
+    features = generate_features(raw_title)
+    print features
+    X_train.append(features)
+
+  for raw_title in X_raw_test:
+    features = generate_features(raw_title)
+    X_test.append(features)
+
+  print "Size of train, test", len(X_train), len(X_test)
+  print "Size of  labels train, test", len(y_train), len(y_test)
+
+
+def generate_features(title):
+  features=[]
+  #First feature is the sentence structure ie words in the title
+  words=title.split(' ')
+  num_words = len(words)
+  features.append(num_words)
+
+  #Number of stop words
+  stop_bool = [ 1 if w in stopwords.words("english") else 0 for w in words]
+  num_stop = sum(stop_bool)
+  features.append(num_stop)
+
+  #Average word length
+  avg_word_len = float(len(title))/num_words
+  features.append(avg_word_len)
+
+  #Pos counts
+  pos_counts = libspacy.get_pos_counts(str(title))
+  features +=pos_counts
+
+  #Num capitalized words
+  num_cap_words =sum( [word.upper()==word and word.lower() !=word for word in words])
+  features.append(num_cap_words)
+  return features
 
 def print_sentence_structure(titles):
   total_words = 0
