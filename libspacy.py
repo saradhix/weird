@@ -33,6 +33,18 @@ def get_pos_counts(sentence):
     if token.pos == spacy.parts_of_speech.ADV:
       pos_counts[3] +=1
   return pos_counts
+
+def get_noun_verb_pos(sentence):
+  ret=[]
+  sentence = nlp(sentence.decode('utf-8'))
+  for token in sentence:
+    if token.pos == spacy.parts_of_speech.NOUN:
+      ret.append('N')
+    if token.pos == spacy.parts_of_speech.VERB:
+      ret.append('V')
+
+  return ''.join(ret)
+
 '''
 s = "A healthy king lives happily"
 print get_adjectives(s)

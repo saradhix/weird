@@ -6,9 +6,19 @@ import libspacy
 import libgrams
 import libwordnet
 from random import shuffle
-
+import os
+import re
+import sys
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dense, Dropout, Activation
+from keras.optimizers import SGD
+import numpy
+from sklearn.metrics import classification_report, confusion_matrix
 def main():
   print "Hello"
+  seed = 0 
+  numpy.random.seed(seed)
 
   weird_news='weird.json'
   normal_news='normal.json'
@@ -66,6 +76,9 @@ def main():
   avg_nes_halves(raw_weird)
   avg_nes_halves(raw_normal)
   print "-"*40
+  nvn_phrases(raw_weird)
+  nvn_phrases(raw_normal)
+  print "-"*40
   '''
   #Create the test and training sets
   shuffle(raw_weird)
@@ -83,19 +96,48 @@ def main():
   X_train=[]
   X_test=[]
 
-
+  print "Extracting features from train"
   for raw_title in X_raw_train:
     features = generate_features(raw_title)
-    print features
+    #print features
     X_train.append(features)
 
+  print "Extracting features from test"
   for raw_title in X_raw_test:
     features = generate_features(raw_title)
     X_test.append(features)
 
+  num_features = len(features)
   print "Size of train, test", len(X_train), len(X_test)
   print "Size of  labels train, test", len(y_train), len(y_test)
+  print "#features=", num_features
 
+  #Start training a neural network
+  model = Sequential()
+  model.add(Dense(4, input_dim=len(features), init='uniform', activation='relu'))
+  #model.add(Dense(4, init='uniform', activation='relu'))
+  model.add(Dense(1, init='uniform', activation='sigmoid'))
+  # Compile model
+  model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+  # Fit the model
+  model.fit(X_train, y_train, nb_epoch=150, batch_size=100)
+  # evaluate the model
+  scores = model.evaluate(X_train, y_train)
+  print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+  print "Running predictions "
+  y_pred = model.predict(X_test)
+  y_pred =[ int(round(i)) for i in y_pred]
+  print confusion_matrix(y_test, y_pred)
+  print classification_report(y_test, y_pred)
+
+  for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
+    if actual != predicted:
+      print "Actual=", actual, "Predicted=", predicted
+      print X_raw_test[i]
+      print X_test[i]
+
+  print confusion_matrix(y_test, y_pred)
+  print classification_report(y_test, y_pred)
 
 def generate_features(title):
   features=[]
@@ -137,6 +179,7 @@ def generate_features(title):
   features.append(num_parts)
 
   #NEs in first and second halves
+  total_f = total_s = 0
   nes = libspacy.get_nes(' '.join(title.split(' ')[:len(title.split(' '))/2]))
   total_f +=len(nes)
   nes = libspacy.get_nes(' '.join(title.split(' ')[len(title.split(' '))/2:]))
@@ -144,6 +187,11 @@ def generate_features(title):
 
   features.append(total_f)
   features.append(total_s)
+
+  #Presence of colon character
+
+  colon = title.count(':')
+  features.append(colon)
 
   return features
 
@@ -204,14 +252,6 @@ def print_quoted_counts(titles):
       total_num_quotes +=1
 
 
-
-def most_repeated_bigrams(titles):
-  bigrams={}
-
-  for title in titles:
-   grams = libgrams.make_trigrams(title.lower())
-   for gram in grams:
-     bigrams[gram]=bigrams.get(gram,0)+1
 
   #for gram in bigrams:
     #print gram, bigrams[gram]
@@ -285,5 +325,15 @@ def avg_nes_halves(titles):
   print "Average NEs First half", avg_f
   print "Average NEs Second half", avg_s
 
+def nvn_phrases(titles):
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    nvps = libspacy.get_noun_verb_pos(title)
+    if 'NVN' in nvps:
+      total += 1
+
+  avg = float(total)/num_titles
+  print "Average NVNs ", avg
 if __name__ == "__main__":
   main()
