@@ -121,13 +121,19 @@ def main():
 
   #Start training a neural network
   model = Sequential()
-  model.add(Dense(100, input_dim=len(features), init='uniform', activation='sigmoid'))
+  model.add(Dense(100, input_dim=len(features), init='uniform' ))
+  model.add(Activation('sigmoid'))
+  model.add(Dropout(0.5))
 #  model.add(Dense(140, init='uniform', activation='relu'))
-  model.add(Dense(80, init='uniform', activation='sigmoid'))
-  model.add(Dense(40, init='uniform', activation='relu'))
-  model.add(Dense(1, init='uniform', activation='tanh'))
+  model.add(Dense(80, init='uniform'))
+  model.add(Activation('tanh'))
+  model.add(Dropout(0.5))
+  model.add(Dense(40, init='uniform'))
+  model.add(Activation('sigmoid'))
+  model.add(Dropout(0.5))
+  model.add(Dense(1, init='uniform', activation='sigmoid'))
   # Compile model
-  model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+  model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
   # Fit the model
   model.fit(X_train, y_train, nb_epoch=150, batch_size=100)
   # evaluate the model
@@ -183,7 +189,9 @@ freq_verbs = ['say', 'found', 'arrest',  'accuse',
         'accuse', 'join', 'seek', 'offer', 'led', 'discuss', 'need', 'leave',
         'bring', 'fight', 'continue', 'announce', 'protest', 'vow',
         'condemn', 'refuse', 'write', 'wound', 'lead', 'member','quit',
-        'withdraw']
+        'withdraw',
+        'porn', 'sex', 'condom', 'nude', 'dead', 'male', 'female', 'mistake'
+        'sink', 'food', 'sky', 'auction', 'pay', 'forgot',  ]
 countries = []
 def generate_features(title):
   features=[]
