@@ -15,6 +15,7 @@ from keras.layers import Dense, Dropout, Activation
 from keras.optimizers import SGD
 import numpy
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import svm
 def main():
   print "Hello"
   seed = 0 
@@ -138,6 +139,13 @@ def main():
 
   print confusion_matrix(y_test, y_pred)
   print classification_report(y_test, y_pred)
+  #Now try with SVM with RBF kernel
+  C = 1.0  # SVM regularization parameter
+  rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
+  y_pred = rbf_svc.predict(X_test)
+  print confusion_matrix(y_test, y_pred)
+  print classification_report(y_test, y_pred)
+
 
 def generate_features(title):
   features=[]
