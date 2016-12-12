@@ -153,6 +153,7 @@ def main():
 
   print confusion_matrix(y_test, y_pred)
   print classification_report(y_test, y_pred)
+  sys.exit()
   #Now try with SVM with RBF kernel
   C = 1.0  # SVM regularization parameter
   rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
