@@ -14,6 +14,14 @@ def get_nouns(sentence):
       nouns.add(token.string)
   return list(nouns)
 
+def get_verbs(sentence):
+  verbs = set()
+  sentence = nlp(sentence.decode('utf-8'))
+  for token in sentence:
+    if token.pos == spacy.parts_of_speech.VERB:
+      verbs.add(token.string)
+  return list(verbs)
+
 def get_nes(sentence):
   parsed=nlp(sentence.decode('utf-8'))
   nes = [ i.label_ for i in parsed.ents]

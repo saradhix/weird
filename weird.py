@@ -81,6 +81,12 @@ def main():
   nvn_phrases(raw_normal)
   print "-"*40
   '''
+
+  #Generate the top N verbs
+  top_weird_verbs = get_top_verbs(raw_weird)
+  print "Top weird verbs =", top_weird_verbs
+  top_normal_verbs = get_top_verbs(raw_normal)
+  print "Top normal verbs =", top_normal_verbs
   #Create the test and training sets
   shuffle(raw_weird)
   shuffle(raw_normal)
@@ -115,9 +121,11 @@ def main():
 
   #Start training a neural network
   model = Sequential()
-  model.add(Dense(4, input_dim=len(features), init='uniform', activation='relu'))
-  #model.add(Dense(4, init='uniform', activation='relu'))
-  model.add(Dense(1, init='uniform', activation='sigmoid'))
+  model.add(Dense(100, input_dim=len(features), init='uniform', activation='sigmoid'))
+#  model.add(Dense(140, init='uniform', activation='relu'))
+  model.add(Dense(80, init='uniform', activation='sigmoid'))
+  model.add(Dense(40, init='uniform', activation='relu'))
+  model.add(Dense(1, init='uniform', activation='tanh'))
   # Compile model
   model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
   # Fit the model
@@ -146,7 +154,37 @@ def main():
   print confusion_matrix(y_test, y_pred)
   print classification_report(y_test, y_pred)
 
+synonyms=['weird', 'supernatural', 'unearthly', 'strange', 'abnormal', 'unusual',
+        'uncanny', 'eerie', 'unnatural', 'unreal', 'ghostly', 'mysterious',
+        'magical', 'bizarre', 'peculiar', 'funny', 'curious', 'offbeat',
+        'eccentric', 'unconventional', 'unorthodox', 'abnormal', 'atypical',
+        'puzzling', 'deviant', 'aberrant', 'grotesque', 'surreal']
 
+freq_verbs1 = ['say', 'get', 'found', 'arrest', 'offer', 'change', 'find', 'accuse',
+        'sue', 'win', 'take', 'jail', 'make', 'seek', 'pay', 'give', 'caught', 
+        'stolen', 'lose', 'turn', 'survive', 'seek', 'give', 'stolen', 'lose', 
+        'turn', 'ask', 'face', 'die', 'kill', 'apologize', 'end', 'save', 'sell',
+        'speak', 'eat', 'driv', 'ban', 'leave', 'keep', 'win', 'held', 'put', 
+        'come', 'steal', 'stop', 'try', 'nab', 'ban', 'miss', 'sentence', 'sue',
+        'fire', 'protest', 'plead', 'call', 'slam', 'visit', 'hit', 'reject',
+        'accuse', 'join', 'seek', 'offer', 'led', 'discuss', 'need', 'leave',
+        'bring', 'arrest', 'fight', 'continue', 'announce', 'protest', 'vow',
+        'condemn', 'refuse', 'write', 'delay', 'slash', 'ready', 'prepar', 'deal'
+        'sign', 
+        ]
+
+freq_verbs = ['say', 'found', 'arrest',  'accuse',
+        'sue', 'jail', 'caught',
+        'stolen', 'lose', 'survive',
+        'die', 'kill', 'apologize', 'end', 'save',
+        'eat', 'driv', 'ban', 'leave', 'keep', 'win',
+        'steal', 'stop', 'nab', 'ban', 'miss', 'sentence', 'sue',
+        'fire', 'protest', 'plead', 'call', 'slam', 'visit', 'hit', 'reject',
+        'accuse', 'join', 'seek', 'offer', 'led', 'discuss', 'need', 'leave',
+        'bring', 'fight', 'continue', 'announce', 'protest', 'vow',
+        'condemn', 'refuse', 'write', 'wound', 'lead', 'member','quit',
+        'withdraw']
+countries = []
 def generate_features(title):
   features=[]
   #First feature is the sentence structure ie words in the title
@@ -201,6 +239,37 @@ def generate_features(title):
   colon = title.count(':')
   features.append(colon)
 
+  f_syn = 0
+  for syn in synonyms:
+    if syn in words:
+      f_syn = 1
+      break
+
+  features.append(f_syn)
+
+  for verb in freq_verbs:
+    if verb in title.lower():
+      features.append(1)
+    else:
+      features.append(0)
+  if '!' in title:
+    features.append(1)
+  else:
+    features.append(0)
+  if '?' in title:
+    features.append(1)
+  else:
+    features.append(0)
+  if '-' in title:
+    features.append(1)
+  else:
+    features.append(0)
+#Country as feature
+  count =0
+  for country in countries:
+    if country in title.lower():
+      count = count+1
+  features.append(count)
   return features
 
 def print_sentence_structure(titles):
@@ -333,6 +402,15 @@ def avg_nes_halves(titles):
   print "Average NEs First half", avg_f
   print "Average NEs Second half", avg_s
 
+def get_top_verbs(titles):
+  verbs_dict = {}
+  for title in titles:
+    verbs = libspacy.get_verbs(title)
+    for verb in verbs:
+      verbs_dict[verb] =verbs_dict.get(verb,0) + 1
+
+  return sorted(verbs_dict.items(), key=lambda x:x[1], reverse=True)[:100]
+
 def nvn_phrases(titles):
   total = 0
   num_titles = len(titles)
@@ -343,5 +421,17 @@ def nvn_phrases(titles):
 
   avg = float(total)/num_titles
   print "Average NVNs ", avg
+
+def load_countries():
+  fp = open('countries.txt', 'r')
+  for line in fp:
+    countries.append(line.strip().lower())
+  print countries
+  return countries
+
 if __name__ == "__main__":
+  load_countries()
+  #title='Russian parliament grants Putin right to use military force in Syria'
+  #print generate_features(title)
+
   main()
