@@ -43,7 +43,7 @@ def main():
     raw_normal.append(str(title))
 
   print "Normal news items :", len(raw_normal)
-  '''
+#  '''
   print_sentence_structure(raw_weird)
   print_sentence_structure(raw_normal)
   print "-"*40
@@ -80,7 +80,8 @@ def main():
   nvn_phrases(raw_weird)
   nvn_phrases(raw_normal)
   print "-"*40
-  '''
+#  '''
+  sys.exit()
 
   #Generate the top N verbs
   top_weird_verbs = get_top_verbs(raw_weird)
@@ -123,14 +124,14 @@ def main():
   model = Sequential()
   model.add(Dense(100, input_dim=len(features), init='uniform' ))
   model.add(Activation('sigmoid'))
-  model.add(Dropout(0.5))
+  model.add(Dropout(0.3))
 #  model.add(Dense(140, init='uniform', activation='relu'))
   model.add(Dense(80, init='uniform'))
   model.add(Activation('tanh'))
-  model.add(Dropout(0.5))
+  model.add(Dropout(0.2))
   model.add(Dense(40, init='uniform'))
   model.add(Activation('sigmoid'))
-  model.add(Dropout(0.5))
+  model.add(Dropout(0.2))
   model.add(Dense(1, init='uniform', activation='sigmoid'))
   # Compile model
   model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
@@ -337,7 +338,13 @@ def print_quoted_counts(titles):
     if num_quotes >=2:
       total_num_quotes +=1
 
+def most_repeated_bigrams(titles):
+  bigrams={}
 
+  for title in titles:
+   grams = libgrams.make_trigrams(title.lower())
+   for gram in grams:
+     bigrams[gram]=bigrams.get(gram,0)+1
 
   #for gram in bigrams:
     #print gram, bigrams[gram]
