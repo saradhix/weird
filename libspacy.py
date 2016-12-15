@@ -53,9 +53,14 @@ def get_noun_verb_pos(sentence):
 
   return ''.join(ret)
 
+def get_nsubj(sentence):
+  parsed = nlp(sentence.decode('utf-8'))
+  return [ i for i in parsed if i.dep_ == "nsubj"]
+  for token in parsed:
+    print token.orth_,token.dep_, token.head.orth
 '''
 s = "A healthy king lives happily"
-print get_adjectives(s)
+print get_nsubj(s)
 s = "I am very rich and beautiful girl"
 print get_adjectives(s)
 '''

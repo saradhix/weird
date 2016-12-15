@@ -44,6 +44,10 @@ def main():
 
   print "Normal news items :", len(raw_normal)
 #  '''
+  print_num_articles_with_colon(raw_weird)
+  print_num_articles_with_colon(raw_normal)
+  print_num_articles_with_exclam(raw_weird)
+  print_num_articles_with_exclam(raw_normal)
   print_sentence_structure(raw_weird)
   print_sentence_structure(raw_normal)
   print "-"*40
@@ -61,6 +65,12 @@ def main():
   print "-"*40
   most_repeated_bigrams(raw_weird)
   most_repeated_bigrams(raw_normal)
+  print "-"*40
+  most_rep_sub_w = most_repeated_subjects(raw_weird)
+  print "Most repeated subjects in weird", most_rep_sub_w
+
+  most_rep_sub_n = most_repeated_subjects(raw_normal)
+  print "Most repeated subjects in normal", most_rep_sub_n
   print "-"*40
   avg_capitalized_words(raw_weird)
   avg_capitalized_words(raw_normal)
@@ -293,6 +303,23 @@ def print_sentence_structure(titles):
   print "Words per title=", words_per_title
 
 
+def print_num_articles_with_colon(titles):
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    if ':' in title:
+      count +=1
+  print 1.0 * count / num_titles 
+
+
+def print_num_articles_with_exclam(titles):
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    if '!' == title.strip()[-1]:
+      count +=1
+  print "Exclaim", 1.0 * count / num_titles 
+
 def print_num_stop_words(titles):
   total_words = 0
   num_titles = len(titles)
@@ -337,6 +364,8 @@ def print_quoted_counts(titles):
     num_quotes = title.count("'")
     if num_quotes >=2:
       total_num_quotes +=1
+  print "Quoted count=", total_num_quotes
+  print "Average quotes=", 1.0*total_num_quotes/num_titles
 
 def most_repeated_bigrams(titles):
   bigrams={}
@@ -353,13 +382,30 @@ def most_repeated_bigrams(titles):
   #  print tup
   #sys.exit()
 
+def most_repeated_subjects(titles):
+  subjects={}
+
+  for title in titles:
+    nsubs = libspacy.get_nsubj(title.lower())
+    for nsub in nsubs:
+      nsub = str(nsub)
+      count=subjects.get(nsub,0)+1
+      subjects[nsub]=subjects.get(nsub,0)+1
+  frq =[]
+  for tup in sorted(subjects.items(), key=lambda x:x[1], reverse=True)[0:40]:
+    print tup
+    frq.append(tup[0])
+  print "**"*40
+  return frq
+
+
 def avg_capitalized_words(titles):
   total_caps = 0
   num_titles = len(titles)
   for title in titles:
     for word in title.split(' '):
-      if word.upper()==word and word.lower() !=word:
-        #print word
+      if word.upper()==word and word.lower() !=word and len(word) >4:
+        #print word, title
         total_caps +=1
 
   avg_caps = float(total_caps)/num_titles
@@ -404,19 +450,24 @@ def avg_nes(titles):
 
 
 def avg_nes_halves(titles):
-  total_f = total_s = 0
+  total_f = total_s = total_b= 0
   num_titles = len(titles)
   for title in titles:
     nes = libspacy.get_nes(' '.join(title.split(' ')[:len(title.split(' '))/2]))
     #print nes
-    total_f +=len(nes)
+    na =int(len(nes)!=0)
+    total_f +=int(len(nes)!=0)
     nes = libspacy.get_nes(' '.join(title.split(' ')[len(title.split(' '))/2:]))
-    total_s +=len(nes)
+    nb =int(len(nes)!=0)
+    total_s +=int(len(nes)!=0)
+    if na > 0 and nb > 0:
+      total_b +=1
 
   avg_f = float(total_f)/num_titles
   avg_s = float(total_s)/num_titles
-  print "Average NEs First half", avg_f
-  print "Average NEs Second half", avg_s
+  print "Average NEs First half", avg_f, "total=", total_f
+  print "Average NEs Second half", avg_s, "total=", total_s
+  print "Total headlines with NE in both halves", total_b, "percent=", 1.0*total_b/num_titles
 
 def get_top_verbs(titles):
   verbs_dict = {}
@@ -442,7 +493,7 @@ def load_countries():
   fp = open('countries.txt', 'r')
   for line in fp:
     countries.append(line.strip().lower())
-  print countries
+  #print countries
   return countries
 
 if __name__ == "__main__":
