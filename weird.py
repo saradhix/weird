@@ -68,8 +68,10 @@ def main():
   print "-"*40
   most_rep_sub_w = most_repeated_subjects(raw_weird)
   print "Most repeated subjects in weird", most_rep_sub_w
+  print_num_articles_with_popular_subject(raw_weird, most_rep_sub_w)
 
   most_rep_sub_n = most_repeated_subjects(raw_normal)
+  print_num_articles_with_popular_subject(raw_normal, most_rep_sub_n)
   print "Most repeated subjects in normal", most_rep_sub_n
   print "-"*40
   avg_capitalized_words(raw_weird)
@@ -495,6 +497,14 @@ def load_countries():
     countries.append(line.strip().lower())
   #print countries
   return countries
+
+def print_num_articles_with_popular_subject(titles, subjects):
+  count = 0
+  for title in titles:
+    words = title.lower().split(' ')
+    if sum([1 if word in subjects else 0 for word in words]) > 0:
+      count +=1
+  print "Number of articles containing most important subjects", count
 
 if __name__ == "__main__":
   load_countries()
