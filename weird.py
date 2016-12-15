@@ -48,6 +48,9 @@ def main():
   print_num_articles_with_colon(raw_normal)
   print_num_articles_with_exclam(raw_weird)
   print_num_articles_with_exclam(raw_normal)
+
+  print_num_articles_with_country(raw_weird)
+  print_num_articles_with_country(raw_normal)
   print_sentence_structure(raw_weird)
   print_sentence_structure(raw_normal)
   print "-"*40
@@ -311,7 +314,7 @@ def print_num_articles_with_colon(titles):
   for title in titles:
     if ':' in title:
       count +=1
-  print 1.0 * count / num_titles 
+  print 1.0 * count / num_titles
 
 
 def print_num_articles_with_exclam(titles):
@@ -320,7 +323,17 @@ def print_num_articles_with_exclam(titles):
   for title in titles:
     if '!' == title.strip()[-1]:
       count +=1
-  print "Exclaim", 1.0 * count / num_titles 
+  print "Exclaim", 1.0 * count / num_titles
+
+def print_num_articles_with_country(titles):
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    words = title.lower().strip().split(' ')
+    for country in countries:
+       if country in words:
+         count +=1
+  print "Country count=", count, "Percent=", 1.0 * count / num_titles
 
 def print_num_stop_words(titles):
   total_words = 0
