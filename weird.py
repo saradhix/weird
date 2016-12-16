@@ -96,13 +96,16 @@ def main():
   nvn_phrases(raw_normal)
   print "-"*40
 #  '''
-  sys.exit()
 
   #Generate the top N verbs
   top_weird_verbs = get_top_verbs(raw_weird)
   print "Top weird verbs =", top_weird_verbs
   top_normal_verbs = get_top_verbs(raw_normal)
   print "Top normal verbs =", top_normal_verbs
+
+  print_len_distributions(raw_weird)
+  print_len_distributions(raw_normal)
+  sys.exit()
   #Create the test and training sets
   shuffle(raw_weird)
   shuffle(raw_normal)
@@ -361,7 +364,7 @@ def print_avg_word_len(titles):
 
 
 def print_pos_distributions(titles):
-  total_counts = [0,0,0,0]
+  total_counts = [0,0,0,0,0,0,0]
   num_titles = len(titles)
   for title in titles:
     #print title
@@ -408,7 +411,7 @@ def most_repeated_subjects(titles):
       subjects[nsub]=subjects.get(nsub,0)+1
   frq =[]
   for tup in sorted(subjects.items(), key=lambda x:x[1], reverse=True)[0:40]:
-    print tup
+    #print tup
     frq.append(tup[0])
   print "**"*40
   return frq
@@ -489,9 +492,21 @@ def get_top_verbs(titles):
   for title in titles:
     verbs = libspacy.get_verbs(title)
     for verb in verbs:
+      verb = str(verb)
       verbs_dict[verb] =verbs_dict.get(verb,0) + 1
 
   return sorted(verbs_dict.items(), key=lambda x:x[1], reverse=True)[:100]
+
+def print_len_distributions(titles):
+  lengths=[]
+  num_titles = len(titles)
+  for title in titles:
+    lengths.append(len(title.split(' ')))
+
+  for length in range(1,21):
+    num_docs = sum([1 if l==length else 0 for l in lengths])
+    percent = 100.0*num_docs/num_titles
+    print "Length=%d num_docs=%d percentage=%f" % (length, num_docs, percent)
 
 def nvn_phrases(titles):
   total = 0
@@ -513,11 +528,12 @@ def load_countries():
 
 def print_num_articles_with_popular_subject(titles, subjects):
   count = 0
+  num_titles = len(titles)
   for title in titles:
     words = title.lower().split(' ')
     if sum([1 if word in subjects else 0 for word in words]) > 0:
       count +=1
-  print "Number of articles containing most important subjects", count
+  print "Number of articles containing most important subjects", count, "percent=", 1.0*count/num_titles
 
 if __name__ == "__main__":
   load_countries()

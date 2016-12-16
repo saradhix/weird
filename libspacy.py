@@ -29,7 +29,7 @@ def get_nes(sentence):
 
 #Gives a tuple of counts in this sequence Noun, Verb, Adj, Adv
 def get_pos_counts(sentence):
-  pos_counts=[0,0,0,0]
+  pos_counts=[0 for i in range(7)]
   sentence = nlp(sentence.decode('utf-8'))
   for token in sentence:
     if token.pos == spacy.parts_of_speech.NOUN:
@@ -40,6 +40,12 @@ def get_pos_counts(sentence):
       pos_counts[2] +=1
     if token.pos == spacy.parts_of_speech.ADV:
       pos_counts[3] +=1
+    if token.pos == spacy.parts_of_speech.DET:
+      pos_counts[4] +=1
+    if token.pos == spacy.parts_of_speech.PUNCT:
+      pos_counts[5] +=1
+    if token.pos == spacy.parts_of_speech.CONJ:
+      pos_counts[6] +=1
   return pos_counts
 
 def get_noun_verb_pos(sentence):
