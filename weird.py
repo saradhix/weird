@@ -22,7 +22,7 @@ def main():
   numpy.random.seed(seed)
 
   weird_news='weird.json'
-  normal_news='normal.json'
+  normal_news='normal2.json'
 
   raw_weird=[]
   raw_normal=[]
@@ -48,6 +48,10 @@ def main():
   print_num_articles_with_colon(raw_normal)
   print_num_articles_with_exclam(raw_weird)
   print_num_articles_with_exclam(raw_normal)
+  print_num_articles_with_possessives(raw_weird)
+  print_num_articles_with_possessives(raw_normal)
+  print_num_articles_with_wh(raw_weird)
+  print_num_articles_with_wh(raw_normal)
 
   print_num_articles_with_country(raw_weird)
   print_num_articles_with_country(raw_normal)
@@ -105,7 +109,6 @@ def main():
 
   print_len_distributions(raw_weird)
   print_len_distributions(raw_normal)
-  sys.exit()
   #Create the test and training sets
   shuffle(raw_weird)
   shuffle(raw_normal)
@@ -166,13 +169,13 @@ def main():
 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
-      print "Actual=", actual, "Predicted=", predicted
-      print X_raw_test[i]
-      print X_test[i]
+      #print "Actual=", actual, "Predicted=", predicted
+      #print X_raw_test[i]
+      #print X_test[i]
+      pass
 
   print confusion_matrix(y_test, y_pred)
   print classification_report(y_test, y_pred)
-  sys.exit()
   #Now try with SVM with RBF kernel
   C = 1.0  # SVM regularization parameter
   rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
@@ -317,7 +320,7 @@ def print_num_articles_with_colon(titles):
   for title in titles:
     if ':' in title:
       count +=1
-  print 1.0 * count / num_titles
+  print "Colon percentage=", 1.0 * count / num_titles
 
 
 def print_num_articles_with_exclam(titles):
@@ -328,6 +331,40 @@ def print_num_articles_with_exclam(titles):
       count +=1
   print "Exclaim", 1.0 * count / num_titles
 
+def print_num_articles_with_possessives(titles):
+  possessives = ['i', 'he','she',  'you', 'they', 'them', 'him', 'her', 'their',
+          'these', 'those', 'this', 'that']
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    for word in title.lower().split(' '):
+      if word in possessives:
+        count +=1
+        #print word, title
+        break
+  print "Possessives percent=", 1.0 * count / num_titles
+
+def print_num_articles_with_wh(titles):
+  wh = ['who','when','what','which','where','whose']
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    word = title.lower().split(' ')[0]
+    if word in wh:
+      count +=1
+      #print word, title
+  print "Wh percent=", 1.0 * count / num_titles
+
+def print_num_articles_with_wh0(titles):
+  wh = ['who','when','what','which','where','whose']
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    for word in title.lower().split(' '):
+      if word in wh:
+        count +=1
+        #print word, title
+        break
 def print_num_articles_with_country(titles):
   count =0
   num_titles = len(titles)
@@ -422,7 +459,7 @@ def avg_capitalized_words(titles):
   num_titles = len(titles)
   for title in titles:
     for word in title.split(' '):
-      if word.upper()==word and word.lower() !=word and len(word) >4:
+      if word.upper()==word and word.lower() !=word and len(word) >1:
         #print word, title
         total_caps +=1
 
