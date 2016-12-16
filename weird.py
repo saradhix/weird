@@ -1,7 +1,5 @@
 import json
 import sys
-import nltk
-from nltk.corpus import stopwords
 import libspacy
 import libgrams
 import libwordnet
@@ -16,8 +14,10 @@ from keras.optimizers import SGD
 import numpy
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn import svm
+
+stopwords=[u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves', u'you', u'your', u'yours', u'yourself', u'yourselves', u'he', u'him', u'his', u'himself', u'she', u'her', u'hers', u'herself', u'it', u'its', u'itself', u'they', u'them', u'their', u'theirs', u'themselves', u'what', u'which', u'who', u'whom', u'this', u'that', u'these', u'those', u'am', u'is', u'are', u'was', u'were', u'be', u'been', u'being', u'have', u'has', u'had', u'having', u'do', u'does', u'did', u'doing', u'a', u'an', u'the', u'and', u'but', u'if', u'or', u'because', u'as', u'until', u'while', u'of', u'at', u'by', u'for', u'with', u'about', u'against', u'between', u'into', u'through', u'during', u'before', u'after', u'above', u'below', u'to', u'from', u'up', u'down', u'in', u'out', u'on', u'off', u'over', u'under', u'again', u'further', u'then', u'once', u'here', u'there', u'when', u'where', u'why', u'how', u'all', u'any', u'both', u'each', u'few', u'more', u'most', u'other', u'some', u'such', u'no', u'nor', u'not', u'only', u'own', u'same', u'so', u'than', u'too', u'very', u's', u't', u'can', u'will', u'just', u'don', u'should', u'now', u'd', u'll', u'm', u'o', u're', u've', u'y', u'ain', u'aren', u'couldn', u'didn', u'doesn', u'hadn', u'hasn', u'haven', u'isn', u'ma', u'mightn', u'mustn', u'needn', u'shan', u'shouldn', u'wasn', u'weren', u'won', u'wouldn']
 def main():
-  print "Hello"
+  print("Hello")
   seed = 0 
   numpy.random.seed(seed)
 
@@ -33,7 +33,7 @@ def main():
     title = ''.join([i if ord(i) < 128 else ' ' for i in json_obj['title']])
     raw_weird.append(str(title))
 
-  print "Weird news items :", len(raw_weird)
+  print( "Weird news items :", len(raw_weird))
 
   #Load normal news
   fd = open(normal_news, 'r')
@@ -42,7 +42,7 @@ def main():
     title = ''.join([i if ord(i) < 128 else ' ' for i in json_obj['title']])
     raw_normal.append(str(title))
 
-  print "Normal news items :", len(raw_normal)
+  print( "Normal news items :", len(raw_normal))
 #  '''
   print_num_articles_with_colon(raw_weird)
   print_num_articles_with_colon(raw_normal)
@@ -57,55 +57,42 @@ def main():
   print_num_articles_with_country(raw_normal)
   print_sentence_structure(raw_weird)
   print_sentence_structure(raw_normal)
-  print "-"*40
   print_num_stop_words(raw_weird)
   print_num_stop_words(raw_normal)
-  print "-"*40
   print_avg_word_len(raw_weird)
   print_avg_word_len(raw_normal)
-  print "-"*40
   print_pos_distributions(raw_weird)
   print_pos_distributions(raw_normal)
-  print "-"*40
   print_quoted_counts(raw_weird)
   print_quoted_counts(raw_normal)
-  print "-"*40
   most_repeated_bigrams(raw_weird)
   most_repeated_bigrams(raw_normal)
-  print "-"*40
   most_rep_sub_w = most_repeated_subjects(raw_weird)
-  print "Most repeated subjects in weird", most_rep_sub_w
+  print ("Most repeated subjects in weird", most_rep_sub_w)
   print_num_articles_with_popular_subject(raw_weird, most_rep_sub_w)
 
   most_rep_sub_n = most_repeated_subjects(raw_normal)
   print_num_articles_with_popular_subject(raw_normal, most_rep_sub_n)
-  print "Most repeated subjects in normal", most_rep_sub_n
-  print "-"*40
+  print ("Most repeated subjects in normal", most_rep_sub_n)
   avg_capitalized_words(raw_weird)
   avg_capitalized_words(raw_normal)
-  print "-"*40
   avg_animals(raw_weird)
   avg_animals(raw_normal)
-  print "-"*40
   avg_body_parts(raw_weird)
   avg_body_parts(raw_normal)
-  print "-"*40
   avg_nes(raw_weird)
   avg_nes(raw_normal)
-  print "-"*40
   avg_nes_halves(raw_weird)
   avg_nes_halves(raw_normal)
-  print "-"*40
   nvn_phrases(raw_weird)
   nvn_phrases(raw_normal)
-  print "-"*40
 #  '''
 
   #Generate the top N verbs
   top_weird_verbs = get_top_verbs(raw_weird)
-  print "Top weird verbs =", top_weird_verbs
+  print( "Top weird verbs =", top_weird_verbs)
   top_normal_verbs = get_top_verbs(raw_normal)
-  print "Top normal verbs =", top_normal_verbs
+  print( "Top normal verbs =", top_normal_verbs)
 
   print_len_distributions(raw_weird)
   print_len_distributions(raw_normal)
@@ -125,21 +112,21 @@ def main():
   X_train=[]
   X_test=[]
 
-  print "Extracting features from train"
+  print("Extracting features from train")
   for raw_title in X_raw_train:
     features = generate_features(raw_title)
     #print features
     X_train.append(features)
 
-  print "Extracting features from test"
+  print( "Extracting features from test")
   for raw_title in X_raw_test:
     features = generate_features(raw_title)
     X_test.append(features)
 
   num_features = len(features)
-  print "Size of train, test", len(X_train), len(X_test)
-  print "Size of  labels train, test", len(y_train), len(y_test)
-  print "#features=", num_features
+  print( "Size of train, test", len(X_train), len(X_test))
+  print( "Size of  labels train, test", len(y_train), len(y_test))
+  print( "#features=", num_features)
 
   #Start training a neural network
   model = Sequential()
@@ -161,11 +148,11 @@ def main():
   # evaluate the model
   scores = model.evaluate(X_train, y_train)
   print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-  print "Running predictions "
+  print( "Running predictions ")
   y_pred = model.predict(X_test)
-  y_pred =[ int(round(i)) for i in y_pred]
-  print confusion_matrix(y_test, y_pred)
-  print classification_report(y_test, y_pred)
+  y_pred =[ int(i+0.5) for i in y_pred]
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
@@ -174,14 +161,14 @@ def main():
       #print X_test[i]
       pass
 
-  print confusion_matrix(y_test, y_pred)
-  print classification_report(y_test, y_pred)
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
   #Now try with SVM with RBF kernel
   C = 1.0  # SVM regularization parameter
   rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
   y_pred = rbf_svc.predict(X_test)
-  print confusion_matrix(y_test, y_pred)
-  print classification_report(y_test, y_pred)
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
 
 synonyms=['weird', 'supernatural', 'unearthly', 'strange', 'abnormal', 'unusual',
         'uncanny', 'eerie', 'unnatural', 'unreal', 'ghostly', 'mysterious',
@@ -224,7 +211,7 @@ def generate_features(title):
   features.append(num_words)
 
   #Number of stop words
-  stop_bool = [ 1 if w in stopwords.words("english") else 0 for w in words]
+  stop_bool = [ 1 if w in stopwords else 0 for w in words]
   num_stop = sum(stop_bool)
   features.append(num_stop)
 
@@ -257,9 +244,9 @@ def generate_features(title):
 
   #NEs in first and second halves
   total_f = total_s = 0
-  nes = libspacy.get_nes(' '.join(title.split(' ')[:len(title.split(' '))/2]))
+  nes = libspacy.get_nes(' '.join(title.split(' ')[:int(len(title.split(' '))/2)]))
   total_f +=len(nes)
-  nes = libspacy.get_nes(' '.join(title.split(' ')[len(title.split(' '))/2:]))
+  nes = libspacy.get_nes(' '.join(title.split(' ')[int(len(title.split(' '))/2):]))
   total_s +=len(nes)
 
   features.append(total_f)
@@ -311,7 +298,7 @@ def print_sentence_structure(titles):
     total_words = total_words + len(words)
 
   words_per_title = float(total_words) / num_titles
-  print "Words per title=", words_per_title
+  print ("Words per title=", words_per_title)
 
 
 def print_num_articles_with_colon(titles):
@@ -320,7 +307,7 @@ def print_num_articles_with_colon(titles):
   for title in titles:
     if ':' in title:
       count +=1
-  print "Colon percentage=", 1.0 * count / num_titles
+  print( "Colon percentage=", 1.0 * count / num_titles)
 
 
 def print_num_articles_with_exclam(titles):
@@ -329,7 +316,7 @@ def print_num_articles_with_exclam(titles):
   for title in titles:
     if '!' == title.strip()[-1]:
       count +=1
-  print "Exclaim", 1.0 * count / num_titles
+  print( "Exclaim", 1.0 * count / num_titles)
 
 def print_num_articles_with_possessives(titles):
   possessives = ['i', 'he','she',  'you', 'they', 'them', 'him', 'her', 'their',
@@ -342,7 +329,7 @@ def print_num_articles_with_possessives(titles):
         count +=1
         #print word, title
         break
-  print "Possessives percent=", 1.0 * count / num_titles
+  print( "Possessives percent=", 1.0 * count / num_titles)
 
 def print_num_articles_with_wh(titles):
   wh = ['who','when','what','which','where','whose']
@@ -353,7 +340,7 @@ def print_num_articles_with_wh(titles):
     if word in wh:
       count +=1
       #print word, title
-  print "Wh percent=", 1.0 * count / num_titles
+  print( "Wh percent=", 1.0 * count / num_titles)
 
 def print_num_articles_with_wh0(titles):
   wh = ['who','when','what','which','where','whose']
@@ -373,18 +360,18 @@ def print_num_articles_with_country(titles):
     for country in countries:
        if country in words:
          count +=1
-  print "Country count=", count, "Percent=", 1.0 * count / num_titles
+  print("Country count=", count, "Percent=", 1.0 * count / num_titles)
 
 def print_num_stop_words(titles):
   total_words = 0
   num_titles = len(titles)
   for title in titles:
     words = title.split(' ')
-    stop_bool = [ 1 if w in stopwords.words("english") else 0 for w in words]
+    stop_bool = [ 1 if w in stopwords else 0 for w in words]
     total_words = total_words + sum(stop_bool)
 
   words_per_title = float(total_words) / num_titles
-  print "Stop Words per title=", words_per_title
+  print( "Stop Words per title=", words_per_title)
 
 
 def print_avg_word_len(titles):
@@ -397,7 +384,7 @@ def print_avg_word_len(titles):
     total_word_lengths += len(title)
 
   avg_word_len = float(total_word_lengths) / total_words
-  print "Average word length=", avg_word_len
+  print( "Average word length=", avg_word_len)
 
 
 def print_pos_distributions(titles):
@@ -410,7 +397,7 @@ def print_pos_distributions(titles):
 
   total_counts=map(lambda x:float(x)/num_titles, total_counts)
 
-  print "POS_stats", total_counts
+  print( "POS_stats", total_counts)
 
 def print_quoted_counts(titles):
   total_num_quotes = 0
@@ -419,8 +406,8 @@ def print_quoted_counts(titles):
     num_quotes = title.count("'")
     if num_quotes >=2:
       total_num_quotes +=1
-  print "Quoted count=", total_num_quotes
-  print "Average quotes=", 1.0*total_num_quotes/num_titles
+  print( "Quoted count=", total_num_quotes)
+  print( "Average quotes=", 1.0*total_num_quotes/num_titles)
 
 def most_repeated_bigrams(titles):
   bigrams={}
@@ -450,7 +437,6 @@ def most_repeated_subjects(titles):
   for tup in sorted(subjects.items(), key=lambda x:x[1], reverse=True)[0:40]:
     #print tup
     frq.append(tup[0])
-  print "**"*40
   return frq
 
 
@@ -464,7 +450,7 @@ def avg_capitalized_words(titles):
         total_caps +=1
 
   avg_caps = float(total_caps)/num_titles
-  print "Capitalized words", avg_caps
+  print( "Capitalized words", avg_caps)
 
 def avg_animals(titles):
   total_animals = 0
@@ -477,7 +463,7 @@ def avg_animals(titles):
     total_animals +=len(animals)
 
   avg_animals = float(total_animals)/num_titles
-  print "Average animals", avg_animals
+  print( "Average animals", avg_animals)
 
 def avg_body_parts(titles):
   total = 0
@@ -490,7 +476,7 @@ def avg_body_parts(titles):
     total +=len(parts)
 
   avg = float(total)/num_titles
-  print "Average body_parts", avg
+  print( "Average body_parts", avg)
 
 def avg_nes(titles):
   total = 0
@@ -501,18 +487,18 @@ def avg_nes(titles):
     total +=len(nes)
 
   avg = float(total)/num_titles
-  print "Average NEs", avg
+  print( "Average NEs", avg)
 
 
 def avg_nes_halves(titles):
   total_f = total_s = total_b= 0
   num_titles = len(titles)
   for title in titles:
-    nes = libspacy.get_nes(' '.join(title.split(' ')[:len(title.split(' '))/2]))
+    nes = libspacy.get_nes(' '.join(title.split(' ')[:int(len(title.split(' '))/2)]))
     #print nes
     na =int(len(nes)!=0)
     total_f +=int(len(nes)!=0)
-    nes = libspacy.get_nes(' '.join(title.split(' ')[len(title.split(' '))/2:]))
+    nes = libspacy.get_nes(' '.join(title.split(' ')[int(len(title.split(' '))/2):]))
     nb =int(len(nes)!=0)
     total_s +=int(len(nes)!=0)
     if na > 0 and nb > 0:
@@ -520,9 +506,9 @@ def avg_nes_halves(titles):
 
   avg_f = float(total_f)/num_titles
   avg_s = float(total_s)/num_titles
-  print "Average NEs First half", avg_f, "total=", total_f
-  print "Average NEs Second half", avg_s, "total=", total_s
-  print "Total headlines with NE in both halves", total_b, "percent=", 1.0*total_b/num_titles
+  print( "Average NEs First half", avg_f, "total=", total_f)
+  print( "Average NEs Second half", avg_s, "total=", total_s)
+  print( "Total headlines with NE in both halves", total_b, "percent=", 1.0*total_b/num_titles)
 
 def get_top_verbs(titles):
   verbs_dict = {}
@@ -543,7 +529,7 @@ def print_len_distributions(titles):
   for length in range(1,21):
     num_docs = sum([1 if l==length else 0 for l in lengths])
     percent = 100.0*num_docs/num_titles
-    print "Length=%d num_docs=%d percentage=%f" % (length, num_docs, percent)
+    print( "Length=%d num_docs=%d percentage=%f" % (length, num_docs, percent))
 
 def nvn_phrases(titles):
   total = 0
@@ -554,7 +540,7 @@ def nvn_phrases(titles):
       total += 1
 
   avg = float(total)/num_titles
-  print "Average NVNs ", avg
+  print( "Average NVNs ", avg)
 
 def load_countries():
   fp = open('countries.txt', 'r')
@@ -570,7 +556,7 @@ def print_num_articles_with_popular_subject(titles, subjects):
     words = title.lower().split(' ')
     if sum([1 if word in subjects else 0 for word in words]) > 0:
       count +=1
-  print "Number of articles containing most important subjects", count, "percent=", 1.0*count/num_titles
+  print( "Number of articles containing most important subjects", count, "percent=", 1.0*count/num_titles)
 
 if __name__ == "__main__":
   load_countries()
