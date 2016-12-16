@@ -14,7 +14,12 @@ from keras.optimizers import SGD
 import numpy
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
+countries = []
+most_rep_sub_w = []
+most_rep_sub_n = []
 stopwords=[u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves', u'you', u'your', u'yours', u'yourself', u'yourselves', u'he', u'him', u'his', u'himself', u'she', u'her', u'hers', u'herself', u'it', u'its', u'itself', u'they', u'them', u'their', u'theirs', u'themselves', u'what', u'which', u'who', u'whom', u'this', u'that', u'these', u'those', u'am', u'is', u'are', u'was', u'were', u'be', u'been', u'being', u'have', u'has', u'had', u'having', u'do', u'does', u'did', u'doing', u'a', u'an', u'the', u'and', u'but', u'if', u'or', u'because', u'as', u'until', u'while', u'of', u'at', u'by', u'for', u'with', u'about', u'against', u'between', u'into', u'through', u'during', u'before', u'after', u'above', u'below', u'to', u'from', u'up', u'down', u'in', u'out', u'on', u'off', u'over', u'under', u'again', u'further', u'then', u'once', u'here', u'there', u'when', u'where', u'why', u'how', u'all', u'any', u'both', u'each', u'few', u'more', u'most', u'other', u'some', u'such', u'no', u'nor', u'not', u'only', u'own', u'same', u'so', u'than', u'too', u'very', u's', u't', u'can', u'will', u'just', u'don', u'should', u'now', u'd', u'll', u'm', u'o', u're', u've', u'y', u'ain', u'aren', u'couldn', u'didn', u'doesn', u'hadn', u'hasn', u'haven', u'isn', u'ma', u'mightn', u'mustn', u'needn', u'shan', u'shouldn', u'wasn', u'weren', u'won', u'wouldn']
 def main():
   print("Hello")
@@ -43,7 +48,7 @@ def main():
     raw_normal.append(str(title))
 
   print( "Normal news items :", len(raw_normal))
-#  '''
+  '''
   print_num_articles_with_colon(raw_weird)
   print_num_articles_with_colon(raw_normal)
   print_num_articles_with_exclam(raw_weird)
@@ -90,16 +95,21 @@ def main():
   avg_nes_halves(raw_normal)
   nvn_phrases(raw_weird)
   nvn_phrases(raw_normal)
-#  '''
+  print_len_distributions(raw_weird)
+  print_len_distributions(raw_normal)
+  '''
+  print("Calling most repeated subjects")
+  most_rep_sub_w = most_repeated_subjects(raw_weird)
+  most_rep_sub_n = most_repeated_subjects(raw_normal)
+  #print(most_rep_sub_w)
+  #print(most_rep_sub_n)
 
   #Generate the top N verbs
   top_weird_verbs = get_top_verbs(raw_weird)
-  print( "Top weird verbs =", top_weird_verbs)
+  #print( "Top weird verbs =", top_weird_verbs)
   top_normal_verbs = get_top_verbs(raw_normal)
-  print( "Top normal verbs =", top_normal_verbs)
+  #print( "Top normal verbs =", top_normal_verbs)
 
-  print_len_distributions(raw_weird)
-  print_len_distributions(raw_normal)
   #Create the test and training sets
   shuffle(raw_weird)
   shuffle(raw_normal)
@@ -119,7 +129,8 @@ def main():
   print("Extracting features from train")
   for raw_title in X_raw_train:
     features = generate_features(raw_title)
-    #print features
+    #print(features)
+    #sys.exit()
     X_train.append(features)
 
   print( "Extracting features from test")
@@ -131,48 +142,47 @@ def main():
   print( "Size of train, test", len(X_train), len(X_test))
   print( "Size of  labels train, test", len(y_train), len(y_test))
   print( "#features=", num_features)
-
-  #Start training a neural network
+#Start training a neural network
   model = Sequential()
-  model.add(Dense(100, input_dim=len(features), init='uniform' ))
-  model.add(Activation('sigmoid'))
-  model.add(Dropout(0.3))
-#  model.add(Dense(140, init='uniform', activation='relu'))
-  model.add(Dense(80, init='uniform'))
-  model.add(Activation('tanh'))
-  model.add(Dropout(0.2))
-  model.add(Dense(40, init='uniform'))
-  model.add(Activation('sigmoid'))
-  model.add(Dropout(0.2))
-  model.add(Dense(1, init='uniform', activation='sigmoid'))
+  model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
+  model.add(Dense(1, init='uniform', activation='relu'))
   # Compile model
   model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
   # Fit the model
-  model.fit(X_train, y_train, nb_epoch=150, batch_size=100)
+  model.fit(X_train, y_train, nb_epoch=50, batch_size=500)
   # evaluate the model
   scores = model.evaluate(X_train, y_train)
   print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
   print( "Running predictions ")
   y_pred = model.predict(X_test)
   y_pred =[ int(i+0.5) for i in y_pred]
+  print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
 
-  for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
-    if actual != predicted:
-      #print "Actual=", actual, "Predicted=", predicted
-      #print X_raw_test[i]
-      #print X_test[i]
-      pass
-
-  print( confusion_matrix(y_test, y_pred))
-  print( classification_report(y_test, y_pred))
   #Now try with SVM with RBF kernel
   C = 1.0  # SVM regularization parameter
   rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
   y_pred = rbf_svc.predict(X_test)
+  print("Results of SVC prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+
+  #Now try with Random Forest with 20 estimators
+  n_estimators=20
+  rf =  RandomForestClassifier(n_estimators=n_estimators).fit(X_train, y_train)
+  y_pred = rf.predict(X_test)
+  print("Results of Random Forest")
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
+
+  knn =  KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
+  y_pred = knn.predict(X_test)
+  print("Results of KNN")
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
+
+
 
 synonyms=['weird', 'supernatural', 'unearthly', 'strange', 'abnormal', 'unusual',
         'uncanny', 'eerie', 'unnatural', 'unreal', 'ghostly', 'mysterious',
@@ -206,8 +216,20 @@ freq_verbs = ['say', 'found', 'arrest',  'accuse',
         'withdraw',
         'porn', 'sex', 'condom', 'nude', 'dead', 'male', 'female', 'mistake'
         'sink', 'food', 'sky', 'auction', 'pay', 'forgot',  ]
-countries = []
 def generate_features(title):
+  features=[]
+  f1=structural_and_punctuation(title)
+  #print("Len of f1", len(f1))
+  f2=linguistic(title)
+  #print("Len of f2", len(f2))
+  f3=word_sentence(title)
+  #print("Len of f3", len(f3))
+
+  features=f1+f2+f3
+
+  return f3
+
+def structural_and_punctuation(title):
   features=[]
   #First feature is the sentence structure ie words in the title
   words=title.split(' ')
@@ -223,9 +245,13 @@ def generate_features(title):
   avg_word_len = float(len(title))/num_words
   features.append(avg_word_len)
 
-  #Pos counts
-  pos_counts = libspacy.get_pos_counts(str(title))
-  features +=pos_counts
+  #Presence of ellipsis
+  if '..' in title:
+    f=1
+  else:
+    f=0
+
+  features.append(f)
 
   #Quoted characters
   num_quotes = title.count("'")
@@ -233,9 +259,68 @@ def generate_features(title):
     num_quotes = 1
   features.append(num_quotes)
 
+  #Presence of colon character
+  colon = title.count(':')
+  features.append(colon)
+
+  if '!' in title:
+    features.append(1)
+  else:
+    features.append(0)
+  if '?' in title:
+    features.append(1)
+  else:
+    features.append(0)
+  if '-' in title:
+    features.append(1)
+  else:
+    features.append(0)
+
+  return features
+
+
+
+def linguistic(title):
+  most_rep_sub_w=['man', 'police', 'woman', 'who', 'it', 'you', 'court', 'he', 'dog', 'that', 'i', 'men', 'women', 'china', 'thief', 'driver', 'boy', 'thieves', 'study', 'judge', 'city', 'town', 'couple', 'scientists', 'museum', 'students', 'firm', 'leader', 'they', 'fans', 'mayor', 'official', 'dogs', 'minister', 'student', 'cat', 'we', 'she', 'putin', 'workers']
+  most_rep_sub_n=['it', 'i', 'that', 'you', 'who', 'india', 'he', 'khan', 'trump', 'we', 'obama', 'us', 'man', 'modi', 'police', 'she', 'clinton', 'this', 'bjp', 'pakistan', 'people', 'dhoni', 'google', 'woman', 'court', 'here', 'congress', 'they', 'president', 'singh', 'kohli', 'china', 'government', 'apple', 'shah', 'what', 'facebook', 'one', 'microsoft', 'film']
+  features=[]
+  f=0
+  #First feature is if any common subject from weird category is present in the title or not
+  words=title.lower().split(' ')
+  num_words = len(words)
+  for word in words:
+    if word in most_rep_sub_w:
+      f=1
+      break
+  features.append(f)
+  for word in words:
+    if word in most_rep_sub_n:
+      f=1
+      break
+  features.append(f)
+
+  #Possessives
+  possessives = ['i', 'he','she',  'you', 'they', 'them', 'him', 'her', 'their',
+          'these', 'those', 'this', 'that']
+  f=0
+  for word in title.lower().split(' '):
+    if word in possessives:
+      f=1
+      break
+  features.append(f)
+
+  #Capitalized words
   #Num capitalized words
   num_cap_words =sum( [word.upper()==word and word.lower() !=word for word in words])
   features.append(num_cap_words)
+
+  return features
+
+def word_sentence(title):
+  features=[]
+  #Pos counts
+  pos_counts = libspacy.get_pos_counts(str(title))
+  features +=pos_counts
 
   #Number of animals and human body parts
   nouns = libspacy.get_nouns(title)
@@ -256,42 +341,26 @@ def generate_features(title):
   features.append(total_f)
   features.append(total_s)
 
-  #Presence of colon character
-
-  colon = title.count(':')
-  features.append(colon)
-
-  f_syn = 0
-  for syn in synonyms:
-    if syn in words:
-      f_syn = 1
-      break
-
-  features.append(f_syn)
-
-  for verb in freq_verbs:
-    if verb in title.lower():
-      features.append(1)
-    else:
-      features.append(0)
-  if '!' in title:
-    features.append(1)
+  #is NVN phrase present
+  nvps = libspacy.get_noun_verb_pos(title)
+  if 'NVN' in nvps:
+    f=1
   else:
-    features.append(0)
-  if '?' in title:
-    features.append(1)
-  else:
-    features.append(0)
-  if '-' in title:
-    features.append(1)
-  else:
-    features.append(0)
+    f=0
+  #features.append(f)
+
 #Country as feature
   count =0
   for country in countries:
     if country in title.lower():
       count = count+1
   features.append(count)
+  f=0
+  for verb in freq_verbs:
+    if verb in title.lower():
+      f=1
+      break
+  features.append(f)
   return features
 
 def print_sentence_structure(titles):
