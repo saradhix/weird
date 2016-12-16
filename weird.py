@@ -52,6 +52,10 @@ def main():
   print_num_articles_with_possessives(raw_normal)
   print_num_articles_with_wh(raw_weird)
   print_num_articles_with_wh(raw_normal)
+  print_num_articles_with_ellipsis(raw_weird)
+  print_num_articles_with_ellipsis(raw_normal)
+  print_num_articles_with_qs(raw_weird)
+  print_num_articles_with_qs(raw_normal)
 
   print_num_articles_with_country(raw_weird)
   print_num_articles_with_country(raw_normal)
@@ -339,8 +343,24 @@ def print_num_articles_with_wh(titles):
     word = title.lower().split(' ')[0]
     if word in wh:
       count +=1
-      #print word, title
+      #print( word, title)
   print( "Wh percent=", 1.0 * count / num_titles)
+
+def print_num_articles_with_ellipsis(titles):
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    if ".." in title:
+      count +=1
+  print( "Ellipsis percent=", 1.0 * count / num_titles)
+
+def print_num_articles_with_qs(titles):
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+    if "?" in title or '!' in title or '$' in title or '#' in title or '%' in title or '-' in title:
+      count +=1
+  print( "Qs percent=", 1.0 * count / num_titles)
 
 def print_num_articles_with_wh0(titles):
   wh = ['who','when','what','which','where','whose']
@@ -395,7 +415,7 @@ def print_pos_distributions(titles):
     title_counts = libspacy.get_pos_counts(str(title))
     total_counts = [ m+n for (m,n) in zip(total_counts, title_counts)]
 
-  total_counts=map(lambda x:float(x)/num_titles, total_counts)
+  total_counts=[float(x)/sum(total_counts) for x in total_counts]
 
   print( "POS_stats", total_counts)
 
