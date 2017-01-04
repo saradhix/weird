@@ -16,6 +16,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 countries = []
 most_rep_sub_w = []
@@ -27,7 +29,7 @@ def main():
   numpy.random.seed(seed)
 
   weird_news='weird.json'
-  normal_news='normal2.json'
+  normal_news='normal.json'
 
   raw_weird=[]
   raw_normal=[]
@@ -98,7 +100,7 @@ def main():
   print_len_distributions(raw_weird)
   print_len_distributions(raw_normal)
   '''
-  print("Calling most repeated subjects")
+  #print("Calling most repeated subjects")
   most_rep_sub_w = most_repeated_subjects(raw_weird)
   most_rep_sub_n = most_repeated_subjects(raw_normal)
   #print(most_rep_sub_w)
@@ -142,6 +144,23 @@ def main():
   print( "Size of train, test", len(X_train), len(X_test))
   print( "Size of  labels train, test", len(y_train), len(y_test))
   print( "#features=", num_features)
+
+#Visualise in 2D with TSNE
+  transformer = TSNE(n_components = 2, perplexity=40, verbose=2)
+  fig, plot = plt.subplots()
+  fig.set_size_inches(50, 50)
+  plt.prism()
+
+  X_transformed = transformer.fit_transform(X_train)
+  plot.scatter(X_transformed[:, 0], X_transformed[:, 1], c=y_train)
+  plot.set_xticks(())
+  plot.set_yticks(())
+
+  count=0;
+  plt.tight_layout()
+  plt.suptitle("TSNE for weird articles")
+  plt.show()
+ 
 #Start training a neural network
   model = Sequential()
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
@@ -159,6 +178,7 @@ def main():
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+
 
   #Now try with SVM with RBF kernel
   C = 1.0  # SVM regularization parameter
@@ -227,7 +247,7 @@ def generate_features(title):
 
   features=f1+f2+f3
 
-  return f3
+  return features
 
 def structural_and_punctuation(title):
   features=[]

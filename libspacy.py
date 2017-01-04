@@ -8,8 +8,8 @@ nlp = English()
 #probs.sort()
 def get_nouns(sentence):
   nouns = set()
-  #sentence = nlp(str(sentence.decode('utf-8'))
-  sentence = nlp(sentence)
+  sentence = nlp(sentence.decode('utf-8'))
+  #sentence = nlp(sentence)
   for token in sentence:
     if token.pos == spacy.parts_of_speech.NOUN:
       nouns.add(token.string)
@@ -17,24 +17,24 @@ def get_nouns(sentence):
 
 def get_verbs(sentence):
   verbs = set()
-  #sentence = nlp(sentence.decode('utf-8'))
-  sentence = nlp(sentence)
+  sentence = nlp(sentence.decode('utf-8'))
+  #sentence = nlp(sentence)
   for token in sentence:
     if token.pos == spacy.parts_of_speech.VERB:
       verbs.add(token.string)
   return list(verbs)
 
 def get_nes(sentence):
-  #parsed=nlp(sentence.decode('utf-8'))
-  parsed=nlp(sentence)
+  parsed=nlp(sentence.decode('utf-8'))
+  #parsed=nlp(sentence)
   nes = [ i.label_ for i in parsed.ents]
   return nes
 
 #Gives a tuple of counts in this sequence Noun, Verb, Adj, Adv
 def get_pos_counts(sentence):
   pos_counts=[0 for i in range(7)]
-  #sentence = nlp(sentence.decode('utf-8'))
-  sentence = nlp(sentence)
+  sentence = nlp(sentence.decode('utf-8'))
+  #sentence = nlp(sentence)
   for token in sentence:
     if token.pos == spacy.parts_of_speech.NOUN:
       pos_counts[0] +=1
@@ -54,7 +54,7 @@ def get_pos_counts(sentence):
 
 def get_noun_verb_pos(sentence):
   ret=[]
-  sentence = nlp(sentence)
+  sentence = nlp(sentence.decode('utf-8'))
   for token in sentence:
     if token.pos == spacy.parts_of_speech.NOUN:
       ret.append('N')
@@ -64,7 +64,7 @@ def get_noun_verb_pos(sentence):
   return ''.join(ret)
 
 def get_nsubj(sentence):
-  parsed = nlp(sentence)
+  parsed = nlp(sentence.decode('utf-8'))
   return [ i for i in parsed if i.dep_ == "nsubj"]
 '''
 s = "A healthy king lives happily"
