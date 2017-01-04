@@ -7,6 +7,7 @@ from random import shuffle
 import os
 import re
 import sys
+import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Dense, Dropout, Activation
@@ -14,11 +15,12 @@ from keras.optimizers import SGD
 import numpy
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn import svm
+from sklearn import linear_model
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
-
+from sklearn.ensemble import ExtraTreesClassifier
 countries = []
 most_rep_sub_w = []
 most_rep_sub_n = []
@@ -29,7 +31,7 @@ def main():
   numpy.random.seed(seed)
 
   weird_news='weird.json'
-  normal_news='normal.json'
+  normal_news='normal2.json'
 
   raw_weird=[]
   raw_normal=[]
@@ -146,7 +148,7 @@ def main():
   print( "#features=", num_features)
 
 #Visualise in 2D with TSNE
-  transformer = TSNE(n_components = 2, perplexity=40, verbose=2)
+  '''  transformer = TSNE(n_components = 2, perplexity=40, verbose=2)
   fig, plot = plt.subplots()
   fig.set_size_inches(50, 50)
   plt.prism()
@@ -160,7 +162,7 @@ def main():
   plt.tight_layout()
   plt.suptitle("TSNE for weird articles")
   plt.show()
- 
+ '''
 #Start training a neural network
   model = Sequential()
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
@@ -181,12 +183,12 @@ def main():
 
 
   #Now try with SVM with RBF kernel
-  C = 1.0  # SVM regularization parameter
-  rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
-  y_pred = rbf_svc.predict(X_test)
-  print("Results of SVC prediction")
-  print( confusion_matrix(y_test, y_pred))
-  print( classification_report(y_test, y_pred))
+  #C = 1.0  # SVM regularization parameter
+  #rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
+  #y_pred = rbf_svc.predict(X_test)
+  #print("Results of SVC prediction")
+  #print( confusion_matrix(y_test, y_pred))
+  #print( classification_report(y_test, y_pred))
 
   #Now try with Random Forest with 20 estimators
   n_estimators=20
@@ -195,12 +197,50 @@ def main():
   print("Results of Random Forest")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-
-  knn =  KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
-  y_pred = knn.predict(X_test)
-  print("Results of KNN")
+  for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
+    if actual != predicted:
+      print "Actual=", actual, "Predicted=", predicted
+      print X_raw_test[i]
+      print X_test[i]
+  print("Results of Random Forest")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+
+  #Do a logistic regression
+  logistic = linear_model.LogisticRegression(C=1e5)
+  logistic.fit(X_train, y_train)
+  y_pred = logistic.predict(X_test)	
+  print("Results of Logistic Regression ")
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
+  print logistic.coef_
+  print logistic.intercept_
+
+
+  #Try feature importances
+# Build a forest and compute the feature importances
+  forest = ExtraTreesClassifier(n_estimators=250,
+                              random_state=0)
+
+  forest.fit(X_train, y_train)
+  importances = forest.feature_importances_
+  std = np.std([tree.feature_importances_ for tree in forest.estimators_],
+             axis=0)
+  indices = np.argsort(importances)[::-1]
+
+# Print the feature ranking
+  print("Feature ranking:")
+
+  X_train=np.array(X_train)
+
+  for f in range(X_train.shape[1]):
+    print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+
+  #knn =  KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
+  #y_pred = knn.predict(X_test)
+  #print("Results of KNN")
+  #print( confusion_matrix(y_test, y_pred))
+  #print( classification_report(y_test, y_pred))
 
 
 
@@ -333,6 +373,16 @@ def linguistic(title):
   #Num capitalized words
   num_cap_words =sum( [word.upper()==word and word.lower() !=word for word in words])
   features.append(num_cap_words)
+
+  #Presence of question forms
+  q_words = ['what', 'which', 'who', 'when', 'whose', 'whom', 'how', 'where']
+  f=0
+  for word in title.lower().split(' '):
+    if word in q_words:
+      f=1
+      break
+  features.append(f)
+
 
   return features
 
