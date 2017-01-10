@@ -163,7 +163,7 @@ def main():
   plt.suptitle("TSNE for weird articles")
   plt.show()
  '''
-#Start training a neural network
+  '''#Start training a neural network
   model = Sequential()
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
   model.add(Dense(1, init='uniform', activation='relu'))
@@ -180,7 +180,7 @@ def main():
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-
+  '''
 
   #Now try with SVM with RBF kernel
   #C = 1.0  # SVM regularization parameter
@@ -213,7 +213,12 @@ def main():
   print("Results of Logistic Regression ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  print logistic.coef_
+  for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
+    if actual != predicted:
+      print "Actual=", actual, "Predicted=", predicted
+      print X_raw_test[i]
+      print X_test[i]
+  print list(logistic.coef_)
   print logistic.intercept_
 
 
