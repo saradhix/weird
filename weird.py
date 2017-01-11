@@ -170,7 +170,7 @@ def main():
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
   model.add(Dense(1, init='uniform', activation='relu'))
   # Compile model
-  model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+  model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
   # Fit the model
   model.fit(X_train, y_train, nb_epoch=50, batch_size=500)
   # evaluate the model
@@ -182,7 +182,6 @@ def main():
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  
 
   '''print("Now try with SVM with RBF kernel")
   C = 1.0  # SVM regularization parameter
@@ -211,19 +210,20 @@ def main():
   '''
 
   print("Try logistic regression")
-  logistic = linear_model.LogisticRegression(C=1e5)
+  logistic = linear_model.LogisticRegression(C=1e4)
   logistic.fit(X_train, y_train)
   y_pred = logistic.predict(X_test)	
   print("Results of Logistic Regression ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  '''for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
+  '''
+  for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
       print X_raw_test[i]
-      print X_test[i]
-  print list(logistic.coef_)
-  print logistic.intercept_
+      #print X_test[i]
+  #print list(logistic.coef_)
+  #print logistic.intercept_
   '''
   sys.exit()
 
