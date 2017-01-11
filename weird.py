@@ -184,7 +184,7 @@ def main():
   print( classification_report(y_test, y_pred))
   
 
-  print("Now try with SVM with RBF kernel")
+  '''print("Now try with SVM with RBF kernel")
   C = 1.0  # SVM regularization parameter
   rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
   y_pred = rbf_svc.predict(X_test)
@@ -199,6 +199,7 @@ def main():
   print("Results of Random Forest")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+  '''
   '''for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
