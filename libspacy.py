@@ -66,6 +66,16 @@ def get_noun_verb_pos(sentence):
 def get_nsubj(sentence):
   parsed = nlp(sentence.decode('utf-8'))
   return [ i for i in parsed if i.dep_ == "nsubj"]
+
+def get_noun_phrases(sentence):
+  ret=[]
+  sentence = nlp(sentence.decode('utf-8'))
+  for np in sentence.noun_chunks:
+    ret.append(np.text)
+  return ret
+def get_vector(sentence):
+  sentence = nlp(sentence.decode('utf-8'))
+  return sentence.vector
 '''
 s = "A healthy king lives happily"
 print get_nsubj(s)

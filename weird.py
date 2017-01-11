@@ -52,6 +52,8 @@ def main():
     raw_normal.append(str(title))
 
   print( "Normal news items :", len(raw_normal))
+  print_num_noun_phrases(raw_normal)
+  print_num_noun_phrases(raw_weird)
   '''
   print_num_articles_with_colon(raw_weird)
   print_num_articles_with_colon(raw_normal)
@@ -163,7 +165,7 @@ def main():
   plt.suptitle("TSNE for weird articles")
   plt.show()
  '''
-  '''#Start training a neural network
+  print("Training a neural network")
   model = Sequential()
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
   model.add(Dense(1, init='uniform', activation='relu'))
@@ -180,24 +182,24 @@ def main():
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  '''
+  
 
-  #Now try with SVM with RBF kernel
-  #C = 1.0  # SVM regularization parameter
-  #rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
-  #y_pred = rbf_svc.predict(X_test)
-  #print("Results of SVC prediction")
-  #print( confusion_matrix(y_test, y_pred))
-  #print( classification_report(y_test, y_pred))
+  print("Now try with SVM with RBF kernel")
+  C = 1.0  # SVM regularization parameter
+  rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
+  y_pred = rbf_svc.predict(X_test)
+  print("Results of SVC prediction")
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
 
-  #Now try with Random Forest with 20 estimators
+  print("Now try with Random Forest with 20 estimators")
   n_estimators=20
   rf =  RandomForestClassifier(n_estimators=n_estimators).fit(X_train, y_train)
   y_pred = rf.predict(X_test)
   print("Results of Random Forest")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
+  '''for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
       print X_raw_test[i]
@@ -205,26 +207,27 @@ def main():
   print("Results of Random Forest")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+  '''
 
-  #Do a logistic regression
+  print("Try logistic regression")
   logistic = linear_model.LogisticRegression(C=1e5)
   logistic.fit(X_train, y_train)
   y_pred = logistic.predict(X_test)	
   print("Results of Logistic Regression ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
+  '''for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
       print X_raw_test[i]
       print X_test[i]
   print list(logistic.coef_)
   print logistic.intercept_
-
+  '''
+  sys.exit()
 
   #Try feature importances
 # Build a forest and compute the feature importances
-  '''
   forest = ExtraTreesClassifier(n_estimators=250, random_state=0)
 
   forest.fit(X_train, y_train)
@@ -240,7 +243,6 @@ def main():
 
   for f in range(X_train.shape[1]):
     print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
-  '''
   #knn =  KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
   #y_pred = knn.predict(X_test)
   #print("Results of KNN")
@@ -290,16 +292,8 @@ def generate_features(title):
   f3=word_sentence(title)
   #print("Len of f3", len(f3))
   #sys.exit()
-  feature_indexes_sorted=[0,2,14,1,24,15,23,5,16,19,18,25,4,10,26,27,17,9,8,
-          11,20,7,13,21,22]
-
-  features=f1+f2+f3
-  num_features_to_select=20
-  features=[features[i] for i in feature_indexes_sorted if i in feature_indexes_sorted[:num_features_to_select] ]
-  #print features, len(features)
-  #sys.exit()
-
-  return features
+  f4=libspacy.get_vector(title)
+  return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):
   features=[]
@@ -443,6 +437,9 @@ def word_sentence(title):
       f=1
       break
   features.append(f)
+
+  num_noun_phrases=len(libspacy.get_noun_phrases(title))
+  features.append(num_noun_phrases)
   return features
 
 def print_sentence_structure(titles):
@@ -463,6 +460,14 @@ def print_num_articles_with_colon(titles):
     if ':' in title:
       count +=1
   print( "Colon percentage=", 1.0 * count / num_titles)
+
+def print_num_noun_phrases(titles):
+  count =0
+  num_titles = len(titles)
+  for title in titles:
+      count +=len(libspacy.get_noun_phrases(title))
+  print( "Average NP=", 1.0 * count / num_titles)
+
 
 
 def print_num_articles_with_exclam(titles):
