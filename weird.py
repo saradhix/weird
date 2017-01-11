@@ -224,8 +224,8 @@ def main():
 
   #Try feature importances
 # Build a forest and compute the feature importances
-  forest = ExtraTreesClassifier(n_estimators=250,
-                              random_state=0)
+  '''
+  forest = ExtraTreesClassifier(n_estimators=250, random_state=0)
 
   forest.fit(X_train, y_train)
   importances = forest.feature_importances_
@@ -240,7 +240,7 @@ def main():
 
   for f in range(X_train.shape[1]):
     print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
-
+  '''
   #knn =  KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
   #y_pred = knn.predict(X_test)
   #print("Results of KNN")
@@ -289,8 +289,15 @@ def generate_features(title):
   #print("Len of f2", len(f2))
   f3=word_sentence(title)
   #print("Len of f3", len(f3))
+  #sys.exit()
+  feature_indexes_sorted=[0,2,14,1,24,15,23,5,16,19,18,25,4,10,26,27,17,9,8,
+          11,20,7,13,21,22]
 
   features=f1+f2+f3
+  num_features_to_select=20
+  features=[features[i] for i in feature_indexes_sorted if i in feature_indexes_sorted[:num_features_to_select] ]
+  #print features, len(features)
+  #sys.exit()
 
   return features
 
@@ -422,7 +429,7 @@ def word_sentence(title):
     f=1
   else:
     f=0
-  #features.append(f)
+  features.append(f)
 
 #Country as feature
   count =0
