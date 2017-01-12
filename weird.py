@@ -120,8 +120,8 @@ def main():
   shuffle(raw_weird)
   shuffle(raw_normal)
 
-  train = 3000
-  test=5000
+  train = 7000
+  test=1000
 
   X_raw_train=raw_weird[:train]+raw_normal[:train]
   X_raw_test=raw_weird[train:train+test]+raw_normal[train:train+test]
@@ -170,7 +170,7 @@ def main():
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
   model.add(Dense(1, init='uniform', activation='relu'))
   # Compile model
-  model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
+  model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
   # Fit the model
   model.fit(X_train, y_train, nb_epoch=50, batch_size=500)
   # evaluate the model
@@ -178,7 +178,7 @@ def main():
   print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
   print( "Running predictions ")
   y_pred = model.predict(X_test)
-  y_pred =[ int(i+0.5) for i in y_pred]
+  y_pred =[ round(i) for i in y_pred]
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
@@ -190,14 +190,16 @@ def main():
   print("Results of SVC prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+  svm_pred=[i for i in y_pred]
 
   print("Now try with Random Forest with 20 estimators")
-  n_estimators=20
+  n_estimators=70
   rf =  RandomForestClassifier(n_estimators=n_estimators).fit(X_train, y_train)
   y_pred = rf.predict(X_test)
   print("Results of Random Forest")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+  rf_pred=[i for i in y_pred]
   #'''
   '''for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
@@ -216,7 +218,8 @@ def main():
   print("Results of Logistic Regression ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  
+  lr_pred=[i for i in y_pred]
+  #''' 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
@@ -224,7 +227,19 @@ def main():
       #print X_test[i]
   #print list(logistic.coef_)
   #print logistic.intercept_
-  
+  #'''
+  #Consolidate the three results via ensemble
+  '''print("Trying ensemble of the above")
+  ens_pred=[]
+  for (s,r,l) in zip(svm_pred, rf_pred, lr_pred):
+    if (s+r+l <=1):
+      ens_pred.append(0)
+    else:
+      ens_pred.append(1)
+
+  print( confusion_matrix(y_test, ens_pred))
+  print( classification_report(y_test, ens_pred))
+  '''
   sys.exit()
 
   #Try feature importances
