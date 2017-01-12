@@ -219,7 +219,7 @@ def main():
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
   lr_pred=[i for i in y_pred]
-  #''' 
+  ''' 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
@@ -227,7 +227,7 @@ def main():
       #print X_test[i]
   #print list(logistic.coef_)
   #print logistic.intercept_
-  #'''
+  '''
   #Consolidate the three results via ensemble
   '''print("Trying ensemble of the above")
   ens_pred=[]
