@@ -2,7 +2,7 @@ import json
 import sys
 def main():
   weird_news='weird.json'
-  normal_news='normal2.json'
+  normal_news='normal.json'
 
   raw_weird=[]
   raw_normal=[]

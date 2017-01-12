@@ -31,7 +31,7 @@ def main():
   numpy.random.seed(seed)
 
   weird_news='weird.json'
-  normal_news='normal2.json'
+  normal_news='normal.json'
 
   raw_weird=[]
   raw_normal=[]
@@ -120,8 +120,8 @@ def main():
   shuffle(raw_weird)
   shuffle(raw_normal)
 
-  train = 7000
-  test=1000
+  train = 3000
+  test=5000
 
   X_raw_train=raw_weird[:train]+raw_normal[:train]
   X_raw_test=raw_weird[train:train+test]+raw_normal[train:train+test]
@@ -164,7 +164,7 @@ def main():
   plt.tight_layout()
   plt.suptitle("TSNE for weird articles")
   plt.show()
- '''
+  '''
   print("Training a neural network")
   model = Sequential()
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
@@ -183,9 +183,9 @@ def main():
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
 
-  '''print("Now try with SVM with RBF kernel")
+  print("Now try with SVM with RBF kernel")
   C = 1.0  # SVM regularization parameter
-  rbf_svc = svm.SVC(kernel='rbf', gamma=0.7, C=C).fit(X_train, y_train)
+  rbf_svc = svm.SVC(kernel='linear', gamma=0.7, C=C).fit(X_train, y_train)
   y_pred = rbf_svc.predict(X_test)
   print("Results of SVC prediction")
   print( confusion_matrix(y_test, y_pred))
@@ -198,7 +198,7 @@ def main():
   print("Results of Random Forest")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  '''
+  #'''
   '''for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
@@ -210,13 +210,13 @@ def main():
   '''
 
   print("Try logistic regression")
-  logistic = linear_model.LogisticRegression(C=1e4)
+  logistic = linear_model.LogisticRegression(C=1e5)
   logistic.fit(X_train, y_train)
   y_pred = logistic.predict(X_test)	
   print("Results of Logistic Regression ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  '''
+  
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
       print "Actual=", actual, "Predicted=", predicted
@@ -224,7 +224,7 @@ def main():
       #print X_test[i]
   #print list(logistic.coef_)
   #print logistic.intercept_
-  '''
+  
   sys.exit()
 
   #Try feature importances
@@ -294,6 +294,7 @@ def generate_features(title):
   #print("Len of f3", len(f3))
   #sys.exit()
   f4=libspacy.get_vector(title)
+  #return f1+f2+f3
   return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):
