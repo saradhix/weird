@@ -18,8 +18,8 @@ from sklearn import svm
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
+#from sklearn.manifold import TSNE
+#import matplotlib.pyplot as plt
 from sklearn.ensemble import ExtraTreesClassifier
 countries = []
 most_rep_sub_w = []
