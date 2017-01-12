@@ -21,6 +21,7 @@ from sklearn.neighbors import KNeighborsClassifier
 #from sklearn.manifold import TSNE
 #import matplotlib.pyplot as plt
 from sklearn.ensemble import ExtraTreesClassifier
+import xgboost
 countries = []
 most_rep_sub_w = []
 most_rep_sub_n = []
@@ -214,7 +215,7 @@ def main():
   print("Try logistic regression")
   logistic = linear_model.LogisticRegression(C=1e5)
   logistic.fit(X_train, y_train)
-  y_pred = logistic.predict(X_test)	
+  y_pred = logistic.predict(X_test)
   print("Results of Logistic Regression ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
@@ -240,6 +241,14 @@ def main():
   print( confusion_matrix(y_test, ens_pred))
   print( classification_report(y_test, ens_pred))
   '''
+  print("Trying XGBoost")
+  model = xgboost.XGBClassifier()
+  model.fit(numpy.array(X_train), numpy.array(y_train))
+  y_pred = model.predict(X_test)
+  y_pred = [round(value) for value in y_pred]
+  print("Results of XGBoost ")
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
   sys.exit()
 
   #Try feature importances
