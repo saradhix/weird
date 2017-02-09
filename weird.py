@@ -55,7 +55,7 @@ def main():
   print( "Normal news items :", len(raw_normal))
   print_num_noun_phrases(raw_normal)
   print_num_noun_phrases(raw_weird)
-  '''
+  #'''
   print_num_articles_with_colon(raw_weird)
   print_num_articles_with_colon(raw_normal)
   print_num_articles_with_exclam(raw_weird)
@@ -104,7 +104,7 @@ def main():
   nvn_phrases(raw_normal)
   print_len_distributions(raw_weird)
   print_len_distributions(raw_normal)
-  '''
+  #'''
   #print("Calling most repeated subjects")
   most_rep_sub_w = most_repeated_subjects(raw_weird)
   most_rep_sub_n = most_repeated_subjects(raw_normal)
@@ -220,6 +220,29 @@ def main():
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
   lr_pred=[i for i in y_pred]
+
+  #Try printing the weird news from veooz news
+  print "Loading veooz articles..May take some time"
+  X_veooz_raw=[]
+  X_veooz=[]
+  weird_count=0
+  count=1
+  with open('veooz.txt') as fp:
+    for line in fp:
+      X=generate_features(line.strip())
+      X_veooz_raw.append(line.strip())
+      X_veooz.append(X)
+      if count % 1000 == 0:
+        print count, "lines loaded"
+        break
+      count +=1
+
+  y_pred_veooz = logistic.predict(X_veooz)
+  print "Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
+  for i , pred in enumerate(y_pred_veooz):
+    if pred:
+      print X_veooz_raw[i]
+
   ''' 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
@@ -249,7 +272,6 @@ def main():
   print("Results of XGBoost ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  sys.exit()
 
   #Try feature importances
 # Build a forest and compute the feature importances
@@ -273,6 +295,7 @@ def main():
   #print("Results of KNN")
   #print( confusion_matrix(y_test, y_pred))
   #print( classification_report(y_test, y_pred))
+  sys.exit()
 
 
 
@@ -318,7 +341,7 @@ def generate_features(title):
   #print("Len of f3", len(f3))
   #sys.exit()
   f4=libspacy.get_vector(title)
-  #return f1+f2+f3
+  return f1+f2+f3
   return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):
