@@ -227,7 +227,7 @@ def main():
   X_veooz=[]
   weird_count=0
   count=1
-  with open('veooz.txt') as fp:
+  with open('veooz_10k.txt') as fp:
     for line in fp:
       X=generate_features(line.strip())
       X_veooz_raw.append(line.strip())
