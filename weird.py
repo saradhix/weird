@@ -55,7 +55,7 @@ def main():
   print( "Normal news items :", len(raw_normal))
   print_num_noun_phrases(raw_normal)
   print_num_noun_phrases(raw_weird)
-  #'''
+  '''
   print_num_articles_with_colon(raw_weird)
   print_num_articles_with_colon(raw_normal)
   print_num_articles_with_exclam(raw_weird)
@@ -104,7 +104,6 @@ def main():
   nvn_phrases(raw_normal)
   print_len_distributions(raw_weird)
   print_len_distributions(raw_normal)
-  #'''
   #print("Calling most repeated subjects")
   most_rep_sub_w = most_repeated_subjects(raw_weird)
   most_rep_sub_n = most_repeated_subjects(raw_normal)
@@ -116,6 +115,7 @@ def main():
   #print( "Top weird verbs =", top_weird_verbs)
   top_normal_verbs = get_top_verbs(raw_normal)
   #print( "Top normal verbs =", top_normal_verbs)
+  '''
 
   #Create the test and training sets
   shuffle(raw_weird)
@@ -166,6 +166,7 @@ def main():
   plt.suptitle("TSNE for weird articles")
   plt.show()
   '''
+  '''
   print("Training a neural network")
   model = Sequential()
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
@@ -183,6 +184,7 @@ def main():
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
+  '''
 
   print("Now try with SVM with RBF kernel")
   C = 1.0  # SVM regularization parameter
@@ -242,6 +244,7 @@ def main():
   for i , pred in enumerate(y_pred_veooz):
     if pred:
       print X_veooz_raw[i]
+      #pass
 
   ''' 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
@@ -366,17 +369,17 @@ def structural_and_punctuation(title):
   else:
     f=0
 
-  features.append(f)
+  #features.append(f) #f3
 
   #Quoted characters
   num_quotes = title.count("'")
   if num_quotes >=2:
     num_quotes = 1
-  features.append(num_quotes)
+  #features.append(num_quotes)
 
   #Presence of colon character
   colon = title.count(':')
-  features.append(colon)
+  #features.append(colon) #f5
 
   if '!' in title:
     features.append(1)
@@ -412,7 +415,8 @@ def linguistic(title):
     if word in most_rep_sub_n:
       f=1
       break
-  features.append(f)
+  #features.append(f) #f10
+
 
   #Possessives
   possessives = ['i', 'he','she',  'you', 'they', 'them', 'him', 'her', 'their',
@@ -422,12 +426,12 @@ def linguistic(title):
     if word in possessives:
       f=1
       break
-  features.append(f)
+  #features.append(f) #f11
 
   #Capitalized words
   #Num capitalized words
   num_cap_words =sum( [word.upper()==word and word.lower() !=word for word in words])
-  features.append(num_cap_words)
+  #features.append(num_cap_words) #f12
 
   #Presence of question forms
   q_words = ['what', 'which', 'who', 'when', 'whose', 'whom', 'how', 'where']
@@ -436,7 +440,7 @@ def linguistic(title):
     if word in q_words:
       f=1
       break
-  features.append(f)
+  #features.append(f) #f13
 
 
   return features
