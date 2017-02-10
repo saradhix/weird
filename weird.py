@@ -118,8 +118,8 @@ def main():
   '''
 
   #Create the test and training sets
-  shuffle(raw_weird)
-  shuffle(raw_normal)
+  #shuffle(raw_weird)
+  #shuffle(raw_normal)
 
   train = 7000
   test=1000
@@ -243,8 +243,8 @@ def main():
   print "Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
   for i , pred in enumerate(y_pred_veooz):
     if pred:
-      print X_veooz_raw[i]
-      #pass
+      #print X_veooz_raw[i]
+      pass
 
   ''' 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
@@ -334,6 +334,7 @@ freq_verbs = ['say', 'found', 'arrest',  'accuse',
         'withdraw',
         'porn', 'sex', 'condom', 'nude', 'dead', 'male', 'female', 'mistake'
         'sink', 'food', 'sky', 'auction', 'pay', 'forgot',  ]
+
 def generate_features(title):
   features=[]
   f1=structural_and_punctuation(title)
@@ -352,7 +353,7 @@ def structural_and_punctuation(title):
   #First feature is the sentence structure ie words in the title
   words=title.split(' ')
   num_words = len(words)
-  features.append(num_words)
+  #features.append(num_words)
 
   #Number of stop words
   stop_bool = [ 1 if w in stopwords else 0 for w in words]
