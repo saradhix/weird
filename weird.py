@@ -32,7 +32,7 @@ def main():
   numpy.random.seed(seed)
 
   weird_news='weird.json'
-  normal_news='normal3.json'
+  normal_news='normalv.json'
 
   raw_weird=[]
   raw_normal=[]
@@ -243,7 +243,7 @@ def main():
   print "Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
   for i , pred in enumerate(y_pred_veooz):
     if pred:
-      #print X_veooz_raw[i]
+      print X_veooz_raw[i]
       pass
 
   ''' 
@@ -353,7 +353,7 @@ def structural_and_punctuation(title):
   #First feature is the sentence structure ie words in the title
   words=title.split(' ')
   num_words = len(words)
-  #features.append(num_words)
+  features.append(num_words)
 
   #Number of stop words
   stop_bool = [ 1 if w in stopwords else 0 for w in words]
