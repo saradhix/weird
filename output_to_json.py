@@ -11,6 +11,7 @@ with open(filename) as fp:
     lang = json_obj.get('lang','U')
     if lang == 'en':
       #print json_obj['tit']
-      new_json = {'title':json_obj['tit'], 'url':json_obj['url']}
-      print json.dumps(new_json)
-
+      #new_json = {'title':json_obj['tit'], 'url':json_obj['url']}
+      #print json.dumps(new_json)
+      out_json = {'title':json_obj['tit'],'description':json_obj['desc']}
+      print json.dumps(out_json)
