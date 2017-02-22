@@ -13,5 +13,5 @@ with open(filename) as fp:
       #print json_obj['tit']
       #new_json = {'title':json_obj['tit'], 'url':json_obj['url']}
       #print json.dumps(new_json)
-      out_json = {'title':json_obj['tit'],'description':json_obj['desc']}
+      out_json = {'title':json_obj['tit'],'description':json_obj['desc'][:32000]}
       print json.dumps(out_json)
