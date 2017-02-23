@@ -32,7 +32,7 @@ def main():
   numpy.random.seed(seed)
 
   weird_news='weird.json'
-  normal_news='normalv.json'
+  normal_news='normal3.json'
 
   raw_weird=[]
   raw_normal=[]
