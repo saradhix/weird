@@ -306,7 +306,7 @@ def generate_features(title):
   #print("Len of f3", len(f3))
   #sys.exit()
   f4=libspacy.get_vector(title)
-  #return f1+f2+f3
+ #return f1+f2+f3
   return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):
