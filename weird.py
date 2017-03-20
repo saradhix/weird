@@ -32,7 +32,7 @@ def main():
   seed = 0
   numpy.random.seed(seed)
 
-  weird_news='weird.json'
+  weird_news='upi_processed.json'
   normal_news='normal3.json'
 
   raw_weird=[]
@@ -179,7 +179,7 @@ def main():
       X_veooz.append(X)
       if count % 10000 == 0:
         print count, "lines loaded"
-        #break
+        break
       count +=1
 
   y_pred_veooz = model.predict(X_veooz)
@@ -210,13 +210,13 @@ def main():
     final_pred.append(pred_class)
   print "Ensemble : Number of weird articles=",sum(final_pred),"in total", len(final_pred)
 
-  sys.exit()
 
-  for i , pred in enumerate(y_pred_veooz):
+  for i , pred in enumerate(final_pred):
     if pred:
-      #print X_veooz_raw[i]
+      print X_veooz_raw[i]
       pass
 
+  sys.exit()
   ''' 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
