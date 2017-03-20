@@ -13,7 +13,8 @@ from keras.layers import Dense
 from keras.layers import Dense, Dropout, Activation
 from keras.optimizers import SGD
 import numpy
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 from sklearn import svm
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestClassifier
@@ -102,7 +103,6 @@ def main():
   plt.suptitle("TSNE for weird articles")
   plt.show()
   '''
-  '''
   print("Training a neural network")
   model = Sequential()
   model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
@@ -120,7 +120,6 @@ def main():
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  '''
 
   print("Now try with SVM with RBF kernel")
   C = 1.0  # SVM regularization parameter
@@ -159,27 +158,63 @@ def main():
   print( classification_report(y_test, y_pred))
   lr_pred=[i for i in y_pred]
 
+  print("Trying XGBoost")
+  xgmodel = xgboost.XGBClassifier()
+  xgmodel.fit(numpy.array(X_train), numpy.array(y_train))
+  y_pred = xgmodel.predict(X_test)
+  y_pred = [round(value) for value in y_pred]
+  print("Results of XGBoost ")
+  print( confusion_matrix(y_test, y_pred))
+  print( classification_report(y_test, y_pred))
   #Try printing the weird news from veooz news
   print "Loading veooz articles..May take some time"
   X_veooz_raw=[]
   X_veooz=[]
   weird_count=0
   count=1
-  with open('veooz_10k.txt') as fp:
+  with open('veooz.txt') as fp:
     for line in fp:
       X=generate_features(line.strip())
       X_veooz_raw.append(line.strip())
       X_veooz.append(X)
-      if count % 1000 == 0:
+      if count % 10000 == 0:
         print count, "lines loaded"
-        break
+        #break
       count +=1
 
+  y_pred_veooz = model.predict(X_veooz)
+  y_pred_veooz = [round(value) for value in y_pred_veooz]
+  nn_pred =[ i for i in y_pred_veooz]
+  print "Neural Nets : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
+  y_pred_veooz = rbf_svc.predict(X_veooz)
+  svm_pred =[ i for i in y_pred_veooz]
+  print "SVM RBF : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
+  y_pred_veooz = rf.predict(X_veooz)
+  rf_pred =[ i for i in y_pred_veooz]
+  print "Random Forest : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
   y_pred_veooz = logistic.predict(X_veooz)
-  print "Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
+  lr_pred =[ i for i in y_pred_veooz]
+  print "Logistic Regression : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
+  y_pred_veooz = [round(value) for value in y_pred_veooz]
+  xg_pred =[ i for i in y_pred_veooz]
+  print "XGBoost : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
+  y_pred_veooz = rbf_svc.predict(X_veooz)
+
+
+  final_pred = []
+  for (a,b,c,d,e) in zip(nn_pred, svm_pred, rf_pred, lr_pred, xg_pred):
+    if a==1 and b==1 and c==1 and d==1 and e==1:
+      pred_class=1
+    else:
+      pred_class=0
+    final_pred.append(pred_class)
+  print "Ensemble : Number of weird articles=",sum(final_pred),"in total", len(final_pred)
+
+  sys.exit()
+
   for i , pred in enumerate(y_pred_veooz):
     if pred:
-      print X_veooz_raw[i]
+      #print X_veooz_raw[i]
       pass
 
   ''' 
@@ -203,15 +238,6 @@ def main():
   print( confusion_matrix(y_test, ens_pred))
   print( classification_report(y_test, ens_pred))
   '''
-  print("Trying XGBoost")
-  model = xgboost.XGBClassifier()
-  model.fit(numpy.array(X_train), numpy.array(y_train))
-  y_pred = model.predict(X_test)
-  y_pred = [round(value) for value in y_pred]
-  print("Results of XGBoost ")
-  print( confusion_matrix(y_test, y_pred))
-  print( classification_report(y_test, y_pred))
-
   #Try feature importances
 # Build a forest and compute the feature importances
   forest = ExtraTreesClassifier(n_estimators=250, random_state=0)
@@ -234,7 +260,6 @@ def main():
   #print("Results of KNN")
   #print( confusion_matrix(y_test, y_pred))
   #print( classification_report(y_test, y_pred))
-  sys.exit()
 
 
 
@@ -281,7 +306,7 @@ def generate_features(title):
   #print("Len of f3", len(f3))
   #sys.exit()
   f4=libspacy.get_vector(title)
-  return f1+f2+f3
+  #return f1+f2+f3
   return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):
