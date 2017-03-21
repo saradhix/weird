@@ -33,7 +33,7 @@ def main():
   numpy.random.seed(seed)
 
   weird_news='upi_processed.json'
-  normal_news='normal3.json'
+  normal_news='normal_jumbo.json'
 
   raw_weird=[]
   raw_normal=[]
@@ -54,6 +54,7 @@ def main():
     raw_normal.append(str(title))
 
   print( "Normal news items :", len(raw_normal))
+  '''
   print_num_noun_phrases(raw_normal)
   print_num_noun_phrases(raw_weird)
   print_num_articles_with_colon(raw_weird)
@@ -117,15 +118,17 @@ def main():
   #Create the test and training sets
   #shuffle(raw_weird)
   #shuffle(raw_normal)
+  '''
 
-  train = 18000
-  test=2000
+  train = 37000
+  test=10000
 
   X_raw_train=raw_weird[:train]+raw_normal[:train]
   X_raw_test=raw_weird[train:train+test]+raw_normal[train:train+test]
   #Create the labels 1st half are weird class 1, rest are normal 0
   y_train=[1]*train+[0]*train
   y_test=[1]*test+[0]*test
+  print sum(y_test),len(y_test)
 
   X_train=[]
   X_test=[]
@@ -165,8 +168,8 @@ def main():
   '''
   print("Training a neural network")
   model = Sequential()
-  model.add(Dense(64, input_dim=len(features), init='uniform', activation='relu' ))
-  model.add(Dense(1, init='uniform', activation='relu'))
+  model.add(Dense(64, input_dim=len(features), init='uniform', activation='sigmoid' ))
+  model.add(Dense(1, init='uniform', activation='sigmoid'))
   # Compile model
   model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
   # Fit the model
@@ -176,7 +179,8 @@ def main():
   print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
   print( "Running predictions ")
   y_pred = model.predict(X_test)
-  y_pred =[ round(i) for i in y_pred]
+  print "y_pred=", y_pred
+  y_pred =[ int(round(i)) for i in y_pred]
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
@@ -222,7 +226,7 @@ def main():
   xgmodel = xgboost.XGBClassifier()
   xgmodel.fit(numpy.array(X_train), numpy.array(y_train))
   y_pred = xgmodel.predict(X_test)
-  y_pred = [round(value) for value in y_pred]
+  y_pred = [int(round(value)) for value in y_pred]
   print("Results of XGBoost ")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
@@ -243,7 +247,7 @@ def main():
       count +=1
 
   y_pred_veooz = model.predict(X_veooz)
-  y_pred_veooz = [round(value) for value in y_pred_veooz]
+  y_pred_veooz = [int(round(value)) for value in y_pred_veooz]
   nn_pred =[ i for i in y_pred_veooz]
   print "Neural Nets : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
   y_pred_veooz = rbf_svc.predict(X_veooz)
@@ -255,7 +259,7 @@ def main():
   y_pred_veooz = logistic.predict(X_veooz)
   lr_pred =[ i for i in y_pred_veooz]
   print "Logistic Regression : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
-  y_pred_veooz = [round(value) for value in y_pred_veooz]
+  y_pred_veooz = [int(round(value)) for value in y_pred_veooz]
   xg_pred =[ i for i in y_pred_veooz]
   print "XGBoost : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
   y_pred_veooz = xgmodel.predict(X_veooz)
@@ -273,7 +277,7 @@ def main():
 
   for i , pred in enumerate(final_pred):
     if pred:
-      #print X_veooz_raw[i]
+      print X_veooz_raw[i]
       pass
 
   sys.exit()
@@ -320,7 +324,7 @@ def main():
   #print("Results of KNN")
   #print( confusion_matrix(y_test, y_pred))
   #print( classification_report(y_test, y_pred))
-
+  #End of main
 
 
 synonyms=['weird', 'supernatural', 'unearthly', 'strange', 'abnormal', 'unusual',
@@ -366,7 +370,8 @@ def generate_features(title):
   #print("Len of f3", len(f3))
   #sys.exit()
   f4=libspacy.get_vector(title)
- #return f1+f2+f3
+  #return f4.tolist()
+  #return f1+f2+f3
   return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):
