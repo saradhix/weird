@@ -1,5 +1,5 @@
 import json 
-ignore_words = ['review','commentary', 'jork', 'quirky', 'interview', 'quirks']
+ignore_words = ['review','commentary', 'jockstrip', 'quirky', 'interview', 'quirks']
 def main():
   upi_data='upi.json'
   fd = open(upi_data, 'r')
