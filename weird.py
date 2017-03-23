@@ -128,7 +128,8 @@ def main():
   #Create the labels 1st half are weird class 1, rest are normal 0
   y_train=[1]*train+[0]*train
   y_test=[1]*test+[0]*test
-  print sum(y_test),len(y_test)
+
+  print "Training :", len(y_train), "Testing :", len(y_test)
 
   X_train=[]
   X_test=[]
@@ -184,7 +185,7 @@ def main():
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-
+  '''
   print("Now try with SVM with RBF kernel")
   C = 1.0  # SVM regularization parameter
   rbf_svc = svm.SVC(kernel='linear', gamma=0.7, C=C).fit(X_train, y_train)
@@ -193,9 +194,10 @@ def main():
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
   svm_pred=[i for i in y_pred]
+  '''
 
   print("Now try with Random Forest with 20 estimators")
-  n_estimators=70
+  n_estimators=100
   rf =  RandomForestClassifier(n_estimators=n_estimators).fit(X_train, y_train)
   y_pred = rf.predict(X_test)
   print("Results of Random Forest")
@@ -250,9 +252,9 @@ def main():
   y_pred_veooz = [int(round(value)) for value in y_pred_veooz]
   nn_pred =[ i for i in y_pred_veooz]
   print "Neural Nets : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
-  y_pred_veooz = rbf_svc.predict(X_veooz)
-  svm_pred =[ i for i in y_pred_veooz]
-  print "SVM RBF : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
+  #y_pred_veooz = rbf_svc.predict(X_veooz)
+  #svm_pred =[ i for i in y_pred_veooz]
+  #print "SVM RBF : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
   y_pred_veooz = rf.predict(X_veooz)
   rf_pred =[ i for i in y_pred_veooz]
   print "Random Forest : Number of weird articles=",sum(y_pred_veooz),"in total", len(y_pred_veooz)
@@ -266,18 +268,22 @@ def main():
 
 
   final_pred = []
-  for (a,b,c,d,e) in zip(nn_pred, svm_pred, rf_pred, lr_pred, xg_pred):
+  #for (a,b,c,d,e) in zip(nn_pred, svm_pred, rf_pred, lr_pred, xg_pred):
+  for (a,b,c,d,e) in zip(nn_pred, nn_pred, rf_pred, lr_pred, xg_pred):
+    '''
     if a==1 and b==1 and c==1 and d==1 and e==1:
       pred_class=1
     else:
       pred_class=0
+    '''
+    pred_class = a + b + c + d + e
     final_pred.append(pred_class)
   print "Ensemble : Number of weird articles=",sum(final_pred),"in total", len(final_pred)
 
 
   for i , pred in enumerate(final_pred):
     if pred:
-      print X_veooz_raw[i]
+      #print X_veooz_raw[i]
       pass
 
   sys.exit()
@@ -370,8 +376,12 @@ def generate_features(title):
   #print("Len of f3", len(f3))
   #sys.exit()
   f4=libspacy.get_vector(title)
+  nouns_vec = libspacy.get_nouns_vector(title)
+  verbs_vec = libspacy.get_verbs_vector(title)
+  adverbs_vec = libspacy.get_adverbs_vector(title)
   #return f4.tolist()
   #return f1+f2+f3
+  return f1+f2+f3+nouns_vec.tolist()+verbs_vec.tolist()+adverbs_vec.tolist()
   return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):

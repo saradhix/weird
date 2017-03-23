@@ -76,6 +76,22 @@ def get_noun_phrases(sentence):
 def get_vector(sentence):
   sentence = nlp(sentence.decode('utf-8'))
   return sentence.vector
+def get_nouns_vector(sentence):
+  sentence = nlp(sentence.decode('utf-8'))
+  nouns_vector = nlp(' '.join([ token.text for token in sentence if token.pos == spacy.parts_of_speech.NOUN]).decode('utf-8')).vector
+  return nouns_vector
+def get_verbs_vector(sentence):
+  sentence = nlp(sentence.decode('utf-8'))
+  #vector = ' '.join([ token.text for token in sentence if token.pos == spacy.parts_of_speech.VERB])
+  vector = nlp(' '.join([ token.text for token in sentence if token.pos == spacy.parts_of_speech.VERB]).decode('utf-8')).vector
+  #print vector
+  return vector
+def get_adverbs_vector(sentence):
+  sentence = nlp(sentence.decode('utf-8'))
+  #vector = ' '.join([ token.text for token in sentence if token.pos == spacy.parts_of_speech.VERB])
+  vector = nlp(' '.join([ token.text for token in sentence if token.pos == spacy.parts_of_speech.ADV]).decode('utf-8')).vector
+  #print vector
+  return vector
 '''
 s = "A healthy king lives happily"
 print get_nsubj(s)
@@ -93,3 +109,6 @@ for token in sentence:
 s='A happy dog barks happily'
 print get_pos_counts(s)
 '''
+s='Pizzas by drones : unmanned air delivery set to take off in New Zealand'
+get_nouns_vector(s)
+get_verbs_vector(s)
