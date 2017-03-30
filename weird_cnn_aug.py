@@ -1,7 +1,7 @@
 '''This script loads pre-trained word embeddings (GloVe embeddings)
 into a frozen Keras Embedding layer, and uses it to
-train a text classification model on the 20 Newsgroup dataset
-(classication of newsgroup messages into 20 different categories).
+train a text classification model for bizarre news item detection
+
 
 GloVe embedding data can be found at:
 http://nlp.stanford.edu/data/glove.6B.zip
@@ -26,14 +26,15 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 BASE_DIR = '../'
 GLOVE_DIR = BASE_DIR + '/glove.6B/'
-TEXT_DATA_DIR = BASE_DIR + '/20_newsgroup/'
 MAX_SEQUENCE_LENGTH = 1000
 MAX_NB_WORDS = 20000
 EMBEDDING_DIM = 100
-VALIDATION_SPLIT = 0.99
+VALIDATION_SPLIT = 0.2
 
 # first, build index mapping words in the embeddings set
 # to their embedding vector
+#Create normal_jumbo.json
+os.system("cat normal.json normal2.json normal3.json normalv.json > normal_jumbo.json")
 
 print('Indexing word vectors.')
 
@@ -62,6 +63,8 @@ for line in fd:
   title = ''.join([i if ord(i) < 128 else ' ' for i in json_obj['title']])
   raw_weird.append(str(title))
 
+#Limit raw_weird to 46893 titles
+raw_weird =raw_weird[:46893]
 print( "Weird news items :", len(raw_weird))
 
 #Load normal news
@@ -106,9 +109,11 @@ x_val = data[-num_validation_samples:]
 y_val = labels[-num_validation_samples:]
 
 print(x_train.shape, y_train.shape)
-
+'''
+for i in range(10):
+  print(x_train[i])
+'''
 print('Preparing embedding matrix.')
-
 # prepare embedding matrix
 num_words = min(MAX_NB_WORDS, len(word_index))
 embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
@@ -154,10 +159,9 @@ print("Shape of x_val, y_val is")
 print(x_val.shape, y_val.shape)
 model.fit(x_train, y_train,
           batch_size=128,
-          epochs=1,
+          epochs=10,
           validation_data=(x_val, y_val))
 y_pred=model.predict(x_val)
 print("Num predictions=",len(y_pred), y_pred.shape)
-print(y_pred.tolist())
-y_pred = [ int(i+0.5) for i in y_pred.tolist()]
+y_pred = [ int(i[0]+0.5) for i in y_pred.tolist()]
 print( classification_report(y_val, y_pred))
