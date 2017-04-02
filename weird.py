@@ -54,6 +54,8 @@ def main():
     raw_normal.append(str(title))
 
   print( "Normal news items :", len(raw_normal))
+  create_subject_file(raw_normal, 'normal_subjects')
+  create_subject_file(raw_weird, 'weird_subjects')
   '''
   print_num_noun_phrases(raw_normal)
   print_num_noun_phrases(raw_weird)
@@ -169,7 +171,8 @@ def main():
   '''
   print("Training a neural network")
   model = Sequential()
-  model.add(Dense(64, input_dim=len(features), init='uniform', activation='sigmoid' ))
+  model.add(Dense(64, input_dim=len(features), kernel_initializer='uniform', activation='sigmoid' ))
+#Dense(64, activation="sigmoid", kernel_initializer="uniform", input_dim=922)
   model.add(Dense(1, init='uniform', activation='sigmoid'))
   # Compile model
   model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics=['accuracy'])
@@ -690,6 +693,13 @@ def most_repeated_bigrams(titles):
   #  print tup
   #sys.exit()
 
+def create_subject_file(titles, fname):
+  fd = open(fname,'w')
+  for title in titles:
+    nsubs = libspacy.get_nsubj(title.lower())
+    for nsub in nsubs:
+      fd.write(str(nsub)+' ')
+  fd.close()
 def most_repeated_subjects(titles):
   subjects={}
 
