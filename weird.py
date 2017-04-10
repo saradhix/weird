@@ -26,6 +26,9 @@ import xgboost
 countries = []
 most_rep_sub_w = []
 most_rep_sub_n = []
+glob_animals={}
+glob_vehicles={}
+glob_human_parts={}
 stopwords=[u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves', u'you', u'your', u'yours', u'yourself', u'yourselves', u'he', u'him', u'his', u'himself', u'she', u'her', u'hers', u'herself', u'it', u'its', u'itself', u'they', u'them', u'their', u'theirs', u'themselves', u'what', u'which', u'who', u'whom', u'this', u'that', u'these', u'those', u'am', u'is', u'are', u'was', u'were', u'be', u'been', u'being', u'have', u'has', u'had', u'having', u'do', u'does', u'did', u'doing', u'a', u'an', u'the', u'and', u'but', u'if', u'or', u'because', u'as', u'until', u'while', u'of', u'at', u'by', u'for', u'with', u'about', u'against', u'between', u'into', u'through', u'during', u'before', u'after', u'above', u'below', u'to', u'from', u'up', u'down', u'in', u'out', u'on', u'off', u'over', u'under', u'again', u'further', u'then', u'once', u'here', u'there', u'when', u'where', u'why', u'how', u'all', u'any', u'both', u'each', u'few', u'more', u'most', u'other', u'some', u'such', u'no', u'nor', u'not', u'only', u'own', u'same', u'so', u'than', u'too', u'very', u's', u't', u'can', u'will', u'just', u'don', u'should', u'now', u'd', u'll', u'm', u'o', u're', u've', u'y', u'ain', u'aren', u'couldn', u'didn', u'doesn', u'hadn', u'hasn', u'haven', u'isn', u'ma', u'mightn', u'mustn', u'needn', u'shan', u'shouldn', u'wasn', u'weren', u'won', u'wouldn']
 def main():
   print("Hello")
@@ -54,9 +57,9 @@ def main():
     raw_normal.append(str(title))
 
   print( "Normal news items :", len(raw_normal))
+  '''
   create_subject_file(raw_normal, 'normal_subjects')
   create_subject_file(raw_weird, 'weird_subjects')
-  '''
   print_num_noun_phrases(raw_normal)
   print_num_noun_phrases(raw_weird)
   print_num_articles_with_colon(raw_weird)
@@ -84,8 +87,10 @@ def main():
   print_pos_distributions(raw_normal)
   print_quoted_counts(raw_weird)
   print_quoted_counts(raw_normal)
-  most_repeated_bigrams(raw_weird)
-  most_repeated_bigrams(raw_normal)
+  #most_repeated_bigrams(raw_weird)
+  #most_repeated_bigrams(raw_normal)
+  #most_repeated_4grams(raw_weird)
+  #most_repeated_4grams(raw_normal)
   most_rep_sub_w = most_repeated_subjects(raw_weird)
   most_rep_sub_n = most_repeated_subjects(raw_normal)
   print ("Most repeated subjects in weird", most_rep_sub_w)
@@ -104,8 +109,10 @@ def main():
   avg_nes_halves(raw_normal)
   nvn_phrases(raw_weird)
   nvn_phrases(raw_normal)
+  '''
   print_len_distributions(raw_weird)
   print_len_distributions(raw_normal)
+  '''
   #print("Calling most repeated subjects")
   most_rep_sub_w = most_repeated_subjects(raw_weird)
   most_rep_sub_n = most_repeated_subjects(raw_normal)
@@ -116,13 +123,13 @@ def main():
   top_weird_verbs = get_top_verbs(raw_weird)
   #print( "Top weird verbs =", top_weird_verbs)
   top_normal_verbs = get_top_verbs(raw_normal)
-  #print( "Top normal verbs =", top_normal_verbs)
+  print( "Top normal verbs =", top_normal_verbs)
   #Create the test and training sets
   #shuffle(raw_weird)
   #shuffle(raw_normal)
   '''
 
-  train = 37000
+  train = 35000
   test=10000
 
   X_raw_train=raw_weird[:train]+raw_normal[:train]
@@ -152,7 +159,36 @@ def main():
   print( "Size of train, test", len(X_train), len(X_test))
   print( "Size of  labels train, test", len(y_train), len(y_test))
   print( "#features=", num_features)
+  '''
+    for tup in sorted(glob_human_parts.items(), key=lambda x:x[1], reverse=True)[:50]:
+    print tup[0], tup[1]
+  for tup in sorted(glob_vehicles.items(), key=lambda x:x[1], reverse=True)[:50]:
+    print tup[0], tup[1]
+    #print tup
+  for tup in sorted(glob_animals.items(), key=lambda x:x[1], reverse=True)[:50]:
+    #print tup
+    print tup[0], tup[1]
+  sys.exit()
+  '''
+  #Try feature importances
+# Build a forest and compute the feature importances
+  '''
+  forest = ExtraTreesClassifier(n_estimators=250, random_state=0)
 
+  forest.fit(X_train, y_train)
+  importances = forest.feature_importances_
+  std = np.std([tree.feature_importances_ for tree in forest.estimators_],
+             axis=0)
+  indices = np.argsort(importances)[::-1]
+
+# Print the feature ranking
+  print("Feature ranking:")
+
+  X_train=np.array(X_train)
+
+  for f in range(X_train.shape[1]):
+    print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+  '''
 #Visualise in 2D with TSNE
   '''  transformer = TSNE(n_components = 2, perplexity=40, verbose=2)
   fig, plot = plt.subplots()
@@ -183,12 +219,11 @@ def main():
   print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
   print( "Running predictions ")
   y_pred = model.predict(X_test)
-  print "y_pred=", y_pred
+  #print "y_pred=", y_pred
   y_pred =[ int(round(i)) for i in y_pred]
   print("Results of NN prediction")
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
-  '''
   print("Now try with SVM with RBF kernel")
   C = 1.0  # SVM regularization parameter
   rbf_svc = svm.SVC(kernel='linear', gamma=0.7, C=C).fit(X_train, y_train)
@@ -197,7 +232,6 @@ def main():
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
   svm_pred=[i for i in y_pred]
-  '''
 
   print("Now try with Random Forest with 20 estimators")
   n_estimators=100
@@ -236,6 +270,7 @@ def main():
   print( confusion_matrix(y_test, y_pred))
   print( classification_report(y_test, y_pred))
   #Try printing the weird news from veooz news
+  sys.exit()
   print "Loading veooz articles..May take some time"
   X_veooz_raw=[]
   X_veooz=[]
@@ -289,7 +324,6 @@ def main():
       #print X_veooz_raw[i]
       pass
 
-  sys.exit()
   ''' 
   for i, (actual, predicted) in enumerate(zip(y_test, y_pred)):
     if actual != predicted:
@@ -311,23 +345,6 @@ def main():
   print( confusion_matrix(y_test, ens_pred))
   print( classification_report(y_test, ens_pred))
   '''
-  #Try feature importances
-# Build a forest and compute the feature importances
-  forest = ExtraTreesClassifier(n_estimators=250, random_state=0)
-
-  forest.fit(X_train, y_train)
-  importances = forest.feature_importances_
-  std = np.std([tree.feature_importances_ for tree in forest.estimators_],
-             axis=0)
-  indices = np.argsort(importances)[::-1]
-
-# Print the feature ranking
-  print("Feature ranking:")
-
-  X_train=np.array(X_train)
-
-  for f in range(X_train.shape[1]):
-    print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
   #knn =  KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
   #y_pred = knn.predict(X_test)
   #print("Results of KNN")
@@ -377,14 +394,16 @@ def generate_features(title):
   #print("Len of f2", len(f2))
   f3=word_sentence(title)
   #print("Len of f3", len(f3))
-  #sys.exit()
   f4=libspacy.get_vector(title)
-  nouns_vec = libspacy.get_nouns_vector(title)
-  verbs_vec = libspacy.get_verbs_vector(title)
-  adverbs_vec = libspacy.get_adverbs_vector(title)
+  #nouns_vec = libspacy.get_nouns_vector(title)
+  #verbs_vec = libspacy.get_verbs_vector(title)
+  #adverbs_vec = libspacy.get_adverbs_vector(title)
   #return f4.tolist()
+  #return f1
   #return f1+f2+f3
-  return f1+f2+f3+nouns_vec.tolist()+verbs_vec.tolist()+adverbs_vec.tolist()
+  #return f3
+  return f4.tolist()
+  return f1+f2+f3
   return f1+f2+f3+f4.tolist()
 
 def structural_and_punctuation(title):
@@ -415,11 +434,11 @@ def structural_and_punctuation(title):
   num_quotes = title.count("'")
   if num_quotes >=2:
     num_quotes = 1
-  #features.append(num_quotes)
+  features.append(num_quotes)
 
   #Presence of colon character
   colon = title.count(':')
-  #features.append(colon) #f5
+  features.append(colon) #f5
 
   if '!' in title:
     features.append(1)
@@ -455,7 +474,7 @@ def linguistic(title):
     if word in most_rep_sub_n:
       f=1
       break
-  #features.append(f) #f10
+  features.append(f) #f10
 
 
   #Possessives
@@ -466,12 +485,12 @@ def linguistic(title):
     if word in possessives:
       f=1
       break
-  #features.append(f) #f11
+  features.append(f) #f11
 
   #Capitalized words
   #Num capitalized words
   num_cap_words =sum( [word.upper()==word and word.lower() !=word for word in words])
-  #features.append(num_cap_words) #f12
+  features.append(num_cap_words) #f12
 
   #Presence of question forms
   q_words = ['what', 'which', 'who', 'when', 'whose', 'whom', 'how', 'where']
@@ -480,7 +499,7 @@ def linguistic(title):
     if word in q_words:
       f=1
       break
-  #features.append(f) #f13
+  features.append(f) #f13
 
 
   return features
@@ -494,9 +513,19 @@ def word_sentence(title):
   #Number of animals and human body parts
   nouns = libspacy.get_nouns(title)
   animals = [w for w in nouns if libwordnet.is_animal(w) ]
+  for animal in animals:
+    glob_animals[animal]=glob_animals.get(animal,0)+1
   num_animals = len(animals)
   parts = [w for w in nouns if libwordnet.is_body_part(w) ]
+  for part in parts:
+    glob_human_parts[part]=glob_human_parts.get(part,0)+1
   num_parts = len(animals)
+  vehicles = [w for w in nouns if libwordnet.is_motor_vehicle(w) ]
+  for vehicle in vehicles:
+    glob_vehicles[vehicle]=glob_vehicles.get(vehicle,0)+1
+  num_parts = len(animals)
+
+
   features.append(num_animals)
   features.append(num_parts)
 
@@ -592,7 +621,7 @@ def print_num_articles_with_wh(titles):
     word = title.lower().split(' ')[0]
     if word in wh:
       count +=1
-      #print( word, title)
+      print( word, title)
   print( "Wh percent=", 1.0 * count / num_titles)
 
 def print_num_articles_with_ellipsis(titles):
@@ -664,7 +693,7 @@ def print_pos_distributions(titles):
     title_counts = libspacy.get_pos_counts(str(title))
     total_counts = [ m+n for (m,n) in zip(total_counts, title_counts)]
 
-  total_counts=[float(x)/sum(total_counts) for x in total_counts]
+  total_counts=[float(x)/num_titles for x in total_counts]
 
   print( "POS_stats", total_counts)
 
@@ -689,9 +718,26 @@ def most_repeated_bigrams(titles):
   #for gram in bigrams:
     #print gram, bigrams[gram]
   #print "-"*40
-  #for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:30]:
-  #  print tup
+  for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:30]:
+    print tup
   #sys.exit()
+
+def most_repeated_4grams(titles):
+  bigrams={}
+  print("4grams begin")
+
+  for title in titles:
+   grams = libgrams.make_4grams(title.lower())
+   for gram in grams:
+     bigrams[gram]=bigrams.get(gram,0)+1
+
+  #for gram in bigrams:
+    #print gram, bigrams[gram]
+  #print "-"*40
+  for tup in sorted(bigrams.items(), key=lambda x:x[1], reverse=True)[:30]:
+    print tup
+  #sys.exit()
+  print("4grams end")
 
 def create_subject_file(titles, fname):
   fd = open(fname,'w')
