@@ -1,41 +1,30 @@
-'''Trains a LSTM on the IMDB sentiment classification task.
-The dataset is actually too small for LSTM to be of any advantage
-compared to simpler, much faster methods such as TF-IDF + LogReg.
-Notes:
-
-- RNNs are tricky. Choice of batch size is important,
-choice of loss and optimizer is critical, etc.
-Some configurations won't converge.
-
-- LSTM loss decrease patterns during training can be quite different
-from what you see with CNNs/MLPs/etc.
-'''
-from __future__ import print_function
-import numpy as np
-np.random.seed(1337)  # for reproducibility
-import glob
-from keras.preprocessing import sequence
-from keras.utils import np_utils
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Embedding
-from keras.layers import LSTM, SimpleRNN, GRU
-from keras.datasets import imdb
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.utils.np_utils import to_categorical
-from nltk.tokenize import TweetTokenizer
-import sys
-import os
-from sklearn.cross_validation import train_test_split
-
 import json
-import libspacy
+import sys
+from random import shuffle
+import os
+import re
+import sys
+import numpy as np
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation, Dropout
+from keras.layers.embeddings import Embedding
+from keras.layers.recurrent import LSTM
+from keras.layers.normalization import BatchNormalization
+from keras.utils import np_utils
+from keras.callbacks import ModelCheckpoint
+from keras.layers.advanced_activations import PReLU
+from keras.preprocessing import sequence, text
 
-#labels = to_categorical(np.asarray(labels))
 def main():
-  weird_news = 'weird.json'
-  normal_news='normal3.json'
+  print("Hello")
+  seed = 0
+  np.random.seed(seed)
+
+  weird_news='upi_processed.json'
+  normal_news='normal_jumbo.json'
 
   raw_weird=[]
   raw_normal=[]
@@ -55,13 +44,10 @@ def main():
     title = ''.join([i if ord(i) < 128 else ' ' for i in json_obj['title']])
     raw_normal.append(str(title))
 
+  print( "Normal news items :", len(raw_normal))
 
-  #Create the test and training sets
-  #shuffle(raw_weird)
-  #shuffle(raw_normal)
-
-  train = 7000
-  test=1000
+  train = 10000
+  test=2000
 
   X_raw_train=raw_weird[:train]+raw_normal[:train]
   X_raw_test=raw_weird[train:train+test]+raw_normal[train:train+test]
@@ -69,48 +55,47 @@ def main():
   y_train=[1]*train+[0]*train
   y_test=[1]*test+[0]*test
 
-  X_train=[]
-  X_test=[]
+  print "Training :", len(y_train), "Testing :", len(y_test)
+  max_len = 80
 
-  print("Extracting features from train")
-  for raw_title in X_raw_train:
-    features = generate_features(raw_title)
-    #print(features)
-    #sys.exit()
-    X_train.append(features)
+  tk = text.Tokenizer(num_words=200000)
+  tk.fit_on_texts(X_raw_train+X_raw_test)
+  X_train = tk.texts_to_sequences(X_raw_train)
+  X_train = sequence.pad_sequences(X_train, maxlen=max_len)
+  X_test = tk.texts_to_sequences(X_raw_test)
+  X_test = sequence.pad_sequences(X_test, maxlen=max_len)
+  word_index = tk.word_index
+  ytrain_enc = np_utils.to_categorical(y_train)
 
-  print( "Extracting features from test")
-  for raw_title in X_raw_test:
-    features = generate_features(raw_title)
-    X_test.append(features)
-
-  print('Building model...')
   model = Sequential()
-  model.add(LSTM(128,input_dim=len(features), dropout_W=0.2, dropout_U=0.2))  # try using a GRU instead, for fun
+  model.add(Embedding(len(word_index) + 1, 300, input_length=80, dropout=0.2))
+  model.add(LSTM(300, dropout=0.2, recurrent_dropout=0.2))
+
+  model.add(Dense(200))
+  model.add(PReLU())
+  model.add(Dropout(0.2))
+  model.add(BatchNormalization())
+
+  model.add(Dense(200))
+  model.add(PReLU())
+  model.add(Dropout(0.2))
+  model.add(BatchNormalization())
+
   model.add(Dense(2))
-  model.add(Activation('sigmoid'))
+  model.add(Activation('softmax'))
+  model.summary()
 
-# try using different optimizers and different optimizer configs
-  model.compile(loss='binary_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
+  model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-  print('Train...')
-  model.fit(X_train, y_train, batch_size=batch_size, nb_epoch=15,
-          validation_data=(X_test, y_test))
-  score, acc = model.evaluate(X_test, y_test,
-                            batch_size=batch_size)
-  print('Test score:', score)
-  print('Test accuracy:', acc)
+  checkpoint = ModelCheckpoint('../data/weights.h5', monitor='val_acc', save_best_only=True, verbose=2)
 
-  predicted = model.predict_classes(np.array(data_test),batch_size=batch_size)
-  print(predicted.shape)
-  #predicted = np.reshape(predicted, (predicted.size,))
-  #print predicted.shape
-def generate_features(title):
-  features=[]
-  features=libspacy.get_vector(title)
-  return features.tolist()
+  model.fit(X_train, y=ytrain_enc,
+                 batch_size=128, epochs=20, verbose=2, validation_split=0.1,
+                 shuffle=True, callbacks=[checkpoint])
 
+
+
+
+#===========================
 if __name__ == "__main__":
   main()
