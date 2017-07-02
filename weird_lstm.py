@@ -90,7 +90,7 @@ def main():
   checkpoint = ModelCheckpoint('../data/weights.h5', monitor='val_acc', save_best_only=True, verbose=2)
 
   model.fit(X_train, y=ytrain_enc,
-                 batch_size=128, epochs=20, verbose=2, validation_split=0.1,
+                 batch_size=128, epochs=20, validation_split=0.1,
                  shuffle=True, callbacks=[checkpoint])
 
 
