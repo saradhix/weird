@@ -46,8 +46,8 @@ def main():
 
   print( "Normal news items :", len(raw_normal))
 
-  train = 10000
-  test=2000
+  train = 5000
+  test=1000
 
   X_raw_train=raw_weird[:train]+raw_normal[:train]
   X_raw_test=raw_weird[train:train+test]+raw_normal[train:train+test]
@@ -55,20 +55,21 @@ def main():
   y_train=[1]*train+[0]*train
   y_test=[1]*test+[0]*test
 
-  print "Training :", len(y_train), "Testing :", len(y_test)
+  print( "Training :", len(y_train), "Testing :", len(y_test))
   max_len = 80
 
   tk = text.Tokenizer(num_words=200000)
   tk.fit_on_texts(X_raw_train+X_raw_test)
   X_train = tk.texts_to_sequences(X_raw_train)
   X_train = sequence.pad_sequences(X_train, maxlen=max_len)
+  print("Dimensions of X_train",X_train.shape)
   X_test = tk.texts_to_sequences(X_raw_test)
   X_test = sequence.pad_sequences(X_test, maxlen=max_len)
   word_index = tk.word_index
   ytrain_enc = np_utils.to_categorical(y_train)
 
   model = Sequential()
-  model.add(Embedding(len(word_index) + 1, 300, input_length=80, dropout=0.2))
+  model.add(Embedding(len(word_index) + 1, 300, input_length=max_len, dropout=0.2))
   model.add(LSTM(300, dropout=0.2, recurrent_dropout=0.2))
 
   model.add(Dense(200))
@@ -87,7 +88,7 @@ def main():
 
   model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-  checkpoint = ModelCheckpoint('../data/weights.h5', monitor='val_acc', save_best_only=True, verbose=2)
+  checkpoint = ModelCheckpoint('weights.h5', monitor='val_acc', save_best_only=True, verbose=2)
 
   model.fit(X_train, y=ytrain_enc,
                  batch_size=128, epochs=20, validation_split=0.1,
