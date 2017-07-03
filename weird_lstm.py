@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
+from keras import metrics
 
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Dropout
@@ -67,6 +68,7 @@ def main():
   X_test = sequence.pad_sequences(X_test, maxlen=max_len)
   word_index = tk.word_index
   ytrain_enc = np_utils.to_categorical(y_train)
+  ytest_enc = np_utils.to_categorical(y_test)
 
   model = Sequential()
   model.add(Embedding(len(word_index) + 1, 300, input_length=max_len, dropout=0.2))
@@ -93,6 +95,10 @@ def main():
   model.fit(X_train, y=ytrain_enc,
                  batch_size=128, epochs=20, validation_split=0.1,
                  shuffle=True, callbacks=[checkpoint])
+  (score, acc) = model.evaluate(X_test, ytest_enc)
+  print('Test score:', score)
+  print('Test accuracy:', acc)
+  #print(y_pred)
 
 
 
