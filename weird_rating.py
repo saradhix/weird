@@ -98,7 +98,7 @@ def main():
     print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
   '''
 #Visualise in 2D with TSNE
-  #'''
+  '''
   transformer = TSNE(n_components = 2, perplexity=40, verbose=2)
   fig, plot = plt.subplots()
   fig.set_size_inches(50, 50)
@@ -113,7 +113,7 @@ def main():
   plt.tight_layout()
   plt.suptitle("TSNE for weird articles")
   plt.show()
-  #'''
+  '''
   '''
   print("Training a neural network")
   model = Sequential()
@@ -193,17 +193,31 @@ def main():
   print y_test, y_pred
 
 
-  X_reduced = TruncatedSVD(n_components=10, random_state=0).fit_transform(X_train+X_test)
+  X_reduced = TruncatedSVD(n_components=50, random_state=0).fit_transform(X_train+X_test)
   X_embedded = TSNE(n_components=2, perplexity=40, verbose=2).fit_transform(X_reduced)
-  #fig = figure(figsize=(10, 10))
-  ax = axes(frameon=False)
-  setp(ax, xticks=(), yticks=())
-  subplots_adjust(left=0.0, bottom=0.0, right=1.0, top=0.9,
-                wspace=0.0, hspace=0.0)
-  scatter(X_embedded[:, 0], X_embedded[:, 1],
-        c=y_train+y_test, marker="x")
+  fig, plot = plt.subplots()
+  fig.set_size_inches(50, 50)
+  #plt.prism()
+  colors_arr=["k","g","b","y","r"]
 
+  plot.scatter(X_embedded[:, 0], X_embedded[:, 1],
+        c=[colors_arr[i] for i in y_train+y_test] )
+
+  plt.tight_layout()
+  plt.suptitle("t-SNE for weird news titles. Color represents rating.")
+  plt.show()
   sys.exit()
+  transformer = TSNE(n_components = 2, perplexity=40, verbose=2)
+  fig, plot = plt.subplots()
+  fig.set_size_inches(50, 50)
+  plt.prism()
+
+  X_transformed = transformer.fit_transform(X_train)
+  plot.scatter(X_transformed[:, 0], X_transformed[:, 1], c=y_train)
+  plot.set_xticks(())
+  plot.set_yticks(())
+
+  #'''
   #End of main
 
 
