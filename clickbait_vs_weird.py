@@ -58,8 +58,22 @@ def main():
 
   print( "clickbait news items :", len(raw_clickbait))
   #'''
-  create_subject_file(raw_clickbait, 'clickbait_subjects')
-  create_subject_file(raw_weird, 'weird_subjects')
+  #create_subject_file(raw_clickbait, 'clickbait_subjects')
+  #create_subject_file(raw_weird, 'weird_subjects')
+  print_num_hyperbolic(raw_clickbait)
+  print_num_hyperbolic(raw_weird)
+  print_num_contractions(raw_clickbait)
+  print_num_contractions(raw_weird)
+  print_num_exophoric(raw_clickbait)
+  print_num_exophoric(raw_weird)
+  print_num_possessives(raw_clickbait)
+  print_num_possessives(raw_weird)
+  print_num_special_punct(raw_clickbait)
+  print_num_special_punct(raw_weird)
+  '''
+  print_num_internet_slangs(raw_clickbait)
+  print_num_internet_slangs(raw_weird)
+  '''
   print_num_noun_phrases(raw_clickbait)
   print_num_noun_phrases(raw_weird)
   print_num_articles_with_colon(raw_weird)
@@ -576,6 +590,67 @@ def print_sentence_structure(titles):
   words_per_title = float(total_words) / num_titles
   print ("Words per title=", words_per_title)
 
+def print_num_hyperbolic(titles):
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    words = title.lower().split(' ')
+    common = set(words).intersection(set(hyperbolic))
+    if len(common) > 0:
+      total += 1
+
+  print("Hyperbolic percent=", 1.0*total/num_titles)
+      
+def print_num_contractions(titles):
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    words = title.lower().split(' ')
+    common = set(words).intersection(set(contractions))
+    if len(common) > 0:
+      total += 1
+
+  print("Word contractions percent=", 1.0*total/num_titles)
+
+def print_num_exophoric(titles):
+  exophores=['this', 'that', 'these', 'those', 'them']
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    words = title.lower().split(' ')
+    common = set(words).intersection(set(exophores))
+    if len(common) > 0:
+      total += 1
+
+  print("Exophores percent=", 1.0*total/num_titles)
+
+def print_num_possessives(titles):
+  possessives = ['i', 'he','she',  'you', 'they', 'them', 'him', 'her', 'their',
+          ]
+
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    words = title.lower().split(' ')
+    common = set(words).intersection(set(possessives))
+    if len(common) > 0:
+      total += 1
+
+  print("Possessives percent=", 1.0*total/num_titles)
+
+def print_num_special_punct(titles):
+  puncts=['**','??','!?','!!','?!','&','@','^','!','#']
+
+  total = 0
+  num_titles = len(titles)
+  for title in titles:
+    words = title.lower().split(' ')
+    common = set(words).intersection(set(puncts))
+    if len(common) > 0:
+      total += 1
+
+  print("Special punct=", 1.0*total/num_titles)
+
 
 def print_num_articles_with_colon(titles):
   count =0
@@ -608,11 +683,10 @@ def print_num_articles_with_possessives(titles):
   count =0
   num_titles = len(titles)
   for title in titles:
-    for word in title.lower().split(' '):
-      if word in possessives:
-        count +=1
-        #print word, title
-        break
+    words=title.lower().split(' ')
+    common = set(words).intersection(set(possessives))
+    if len(common) > 0:
+      count +=1
   print( "Possessives percent=", 1.0 * count / num_titles)
 
 def print_num_articles_with_wh(titles):
@@ -883,9 +957,33 @@ def print_num_articles_with_popular_subject(titles, subjects):
       count +=1
   print( "Number of articles containing most important subjects", count, "percent=", 1.0*count/num_titles)
 
+
+def load_resources():
+  global subjects
+  global ngrams
+  global hyperbolic
+  global contractions
+  global common_phrases
+  global common_words
+
+  subjects = load_file('subjects')
+  ngrams = load_file('normal_ngrams1')
+  hyperbolic = load_file('hyperbolic')
+  contractions = load_file('contractions')
+  common_phrases = load_file('common_phrases')
+  common_words = load_file('common')
+
+def load_file(filename):
+  words=[]
+  fd = open(filename,'r')
+  for line in fd:
+    words.append(line.strip())
+  return words
+
+
 if __name__ == "__main__":
   load_countries()
   #title='Russian parliament grants Putin right to use military force in Syria'
   #print generate_features(title)
-
+  load_resources()
   main()
