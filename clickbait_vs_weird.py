@@ -76,18 +76,18 @@ def main():
   '''
   print_num_noun_phrases(raw_clickbait)
   print_num_noun_phrases(raw_weird)
-  print_num_articles_with_colon(raw_weird)
   print_num_articles_with_colon(raw_clickbait)
-  print_num_articles_with_exclam(raw_weird)
+  print_num_articles_with_colon(raw_weird)
   print_num_articles_with_exclam(raw_clickbait)
-  print_num_articles_with_possessives(raw_weird)
-  print_num_articles_with_possessives(raw_clickbait)
-  print_num_articles_with_wh(raw_weird)
+  print_num_articles_with_exclam(raw_weird)
+  print_num_articles_with_determiners(raw_clickbait)
+  print_num_articles_with_determiners(raw_weird)
   print_num_articles_with_wh(raw_clickbait)
-  print_num_articles_with_ellipsis(raw_weird)
+  print_num_articles_with_wh(raw_weird)
   print_num_articles_with_ellipsis(raw_clickbait)
-  print_num_articles_with_qs(raw_weird)
+  print_num_articles_with_ellipsis(raw_weird)
   print_num_articles_with_qs(raw_clickbait)
+  print_num_articles_with_qs(raw_weird)
 
   print_num_articles_with_country(raw_weird)
   print_num_articles_with_country(raw_clickbait)
@@ -495,7 +495,7 @@ def linguistic(title):
 
   #Possessives
   possessives = ['i', 'he','she',  'you', 'they', 'them', 'him', 'her', 'their',
-          'these', 'those', 'this', 'that']
+          'these', 'those', 'this', 'that', 'my', 'which']
   f=0
   for word in title.lower().split(' '):
     if word in possessives:
@@ -677,9 +677,9 @@ def print_num_articles_with_exclam(titles):
       count +=1
   print( "Exclaim", 1.0 * count / num_titles)
 
-def print_num_articles_with_possessives(titles):
+def print_num_articles_with_determiners(titles):
   possessives = ['i', 'he','she',  'you', 'they', 'them', 'him', 'her', 'their',
-          'these', 'those', 'this', 'that']
+          'these', 'those', 'this', 'that', 'my', 'which']
   count =0
   num_titles = len(titles)
   for title in titles:
@@ -687,10 +687,11 @@ def print_num_articles_with_possessives(titles):
     common = set(words).intersection(set(possessives))
     if len(common) > 0:
       count +=1
-  print( "Possessives percent=", 1.0 * count / num_titles)
+  print( "Determiners percent=", 1.0 * count / num_titles)
 
 def print_num_articles_with_wh(titles):
   wh = ['who','when','what','which','where','whose']
+  wh = ['what', 'which', 'who', 'when', 'whose', 'whom', 'how', 'where']
   count =0
   num_titles = len(titles)
   for title in titles:
