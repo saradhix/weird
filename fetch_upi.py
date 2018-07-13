@@ -5,9 +5,9 @@ import sys
 
 
 start_page=1
-end_page=126
+end_page=106
 
-baseurl='http://www.upi.com/Odd_News/2001/p'
+baseurl='http://www.upi.com/Odd_News/2018/p'
 
 
 for page in range(start_page, end_page+1):
