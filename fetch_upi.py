@@ -5,7 +5,7 @@ import sys
 
 
 start_page=1
-end_page=106
+end_page=189
 
 baseurl='http://www.upi.com/Odd_News/2018/p'
 
@@ -28,4 +28,4 @@ for page in range(start_page, end_page+1):
     #print title,',',link
 
     jsonobj={'title':title,'url':link}
-    print json.dumps(jsonobj)
+    print(json.dumps(jsonobj))
